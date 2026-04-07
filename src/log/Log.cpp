@@ -1,0 +1,1 @@
+#include "RST/log/Log.hpp"
