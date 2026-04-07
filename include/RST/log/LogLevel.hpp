@@ -11,6 +11,6 @@ namespace RST::Log {
         Error,
         Fatal
     };
-}
 
-std::ostream& operator<<(std::ostream& out, const RST::Log::LogLevel level);
+    std::ostream& operator<<(std::ostream& out, const RST::Log::LogLevel level);
+}

@@ -1,7 +1,7 @@
 #include "RST/log/LogLevel.hpp"
 
 namespace RST::Log {
-    std::ostream& operator<<(std::ostream& out, const Log::LogLevel level) {
+    std::ostream& operator<<(std::ostream& out, const RST::Log::LogLevel level) {
         switch (level) {
             case Log::LogLevel::Trace:
                 return out << "TRACE";

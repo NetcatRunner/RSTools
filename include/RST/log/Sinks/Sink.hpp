@@ -15,5 +15,5 @@ namespace RST::Log {
         virtual void set_pattern(const std::string &pattern) = 0;
     };
 
-    using sink_ptr = std::shared_ptr<Log::ISink>;
+    using sink_ptr = std::shared_ptr<ISink>;
 }
