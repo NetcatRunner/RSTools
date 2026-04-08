@@ -1,0 +1,36 @@
+name: RSTools CI
+run-name: ${{ github.actor }} is pushing new code
+
+on:
+  push:
+    branches-ignore:
+      - 'ga-ignore-*'
+  pull_request:
+    branches-ignore:
+      - 'ga-ignore-*'
+
+jobs:
+  cmake_build:
+    name: Build & Test (Ubuntu)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Configure project with CMake
+        run: cmake -S . -B build
+
+      - name: Build project with CMake
+        run: cmake --build build --parallel
+
+      - name: Verify static library creation
+        run: |
+          if [ ! -f "build/libRST.a" ]; then
+            echo "::error title=Library not found::build/libRST.a"
+            exit 1
+          fi
+
+      - name: Run CTest
+        working-directory: build
+        timeout-minutes: 5
+        run: ctest --output-on-failure --parallel
