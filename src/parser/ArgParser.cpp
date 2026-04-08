@@ -347,6 +347,9 @@ namespace RST::Parser {
         for (int i = 1; i < argc; i++) {
             const std::string token = argv[i];
 
+            if (token == "--help" || token == "-h")
+                throw HelpRequested(_programName);
+
             if (token == "--") {
                 endOfOptions = true;
                 continue;

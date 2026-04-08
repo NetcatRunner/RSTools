@@ -14,10 +14,15 @@ int main(int argc, const char** argv) {
     RST::Parser::ArgParser parser;
     parser.addFlag({"--help", "-h"}, "Help message");
 
-    parser.parse(argc, argv);
-    if (parser.isSet("--help")) {
-        std::cout << "Usage: ./app [--verbose]\n";
+    try {
+        parser.parse(argc, argv);
+    } catch (const RST::Parser::HelpRequested& h) {
+        parser.printHelp();
         return 0;
+    } catch (const std::exception& e) {
+        std::cerr << "[error] " << e.what() << "\n\n";
+        parser.printHelp();
+        return 1;
     }
 
     // Example: Using String utilities

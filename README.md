@@ -72,7 +72,7 @@ To integrate RSTools into your C++ project, follow these simple steps using CMak
 1.  Clone the repository into your project's directory (e.g., in a `lib/` or `vendor/` folder):
 
     ```bash
-    git clone https://github.com/your_username/RSTools.git lib/RSTools
+    git clone https://github.com/NetcatRunner/RSTools.git lib/RSTools
     ```
 
 2.  Add the library to your `CMakeLists.txt`:

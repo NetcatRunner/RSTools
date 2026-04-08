@@ -3,6 +3,7 @@
 #include <vector>
 #include <string>
 #include <exception>
+#include <stdexcept>
 #include <set>
 #include <functional>
 #include <memory>
@@ -11,6 +12,19 @@
 #include <sstream>
 
 namespace RST::Parser {
+
+    // ─────────────────────────────────────────────────────────────────────────────
+    //  Custom Exception declarations
+    // ─────────────────────────────────────────────────────────────────────────────
+    class HelpRequested : public std::exception {
+    private:
+        const std::string _programName;
+    public:
+        explicit HelpRequested(const std::string& programName): _programName(programName) {}
+
+        const char* what() const noexcept override {return "help requested";};
+        const std::string& programName() const noexcept {return _programName;};
+    };
 
     // ─────────────────────────────────────────────────────────────────────────────
     //  Forward declarations
