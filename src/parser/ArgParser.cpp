@@ -77,6 +77,10 @@ namespace RST::Parser {
         _ref.allowedExts = std::set<std::string>(exts);
         return *this;
     }
+    PositionalBuilder& PositionalBuilder::range(double lo, double hi) {
+        _ref.numRange = {lo, hi};
+        return *this;
+    }
 
     // ─────────────────────────────────────────────────────────────────────────────
     //  ArgParser
@@ -319,6 +323,15 @@ namespace RST::Parser {
                     allowed += e + " ";
                 throw std::invalid_argument("File '" + val + "' has wrong extension. Allowed: " + allowed);
             }
+        }
+        if (arg.numRange.has_value()) {
+            double num;
+            std::istringstream iss(val);
+            if (!(iss >> num))
+                throw std::invalid_argument("Value '" + val + "' for " + arg.name + " is not a number");
+            auto [lo, hi] = *arg.numRange;
+            if (num < lo || num > hi)
+                throw std::out_of_range("Value " + val + " for " + arg.name + " is out of range [" + std::to_string(lo) + ", " + std::to_string(hi) + "]");
         }
         if (arg.validator)
             arg.validator(val);

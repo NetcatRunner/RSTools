@@ -61,6 +61,7 @@ namespace RST::Parser {
         std::set<std::string>               choices;
         bool                               pathMustExist = false;
         std::set<std::string>               allowedExts;
+        std::optional<std::pair<double,double>> numRange;
         std::function<void(const std::string&)> validator;
     };
 
@@ -118,6 +119,7 @@ namespace RST::Parser {
         PositionalBuilder& validate(std::function<void(const std::string&)> fn);
         PositionalBuilder& mustExist();
         PositionalBuilder& extension(std::initializer_list<std::string> exts);
+        PositionalBuilder& range(double lo, double hi);
     };
 
     // ─────────────────────────────────────────────────────────────────────────────
