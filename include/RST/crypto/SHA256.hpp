@@ -5,8 +5,6 @@ namespace RST::Crypto {
 
     public:
         SHA256() = default;
-
     private:
-        
     };
 }
