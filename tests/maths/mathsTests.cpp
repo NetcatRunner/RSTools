@@ -13,7 +13,7 @@ TEST_CASE(simple_vector_test) {
   CHECK(v.getX() == 1);
   CHECK(v.getY() == 3);
 
-  v.Add(RST::Maths::Vec2i(5, 1));
+  v += RST::Maths::Vec2i(5, 1);
 
   CHECK(v == RST::Maths::Vec2i(6, 4));
 };

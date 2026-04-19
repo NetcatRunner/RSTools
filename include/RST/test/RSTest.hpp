@@ -18,7 +18,7 @@ namespace RST::RSTester {
     constexpr const char* COLOR_BOLD_RED    = "\033[1;31m";
     constexpr const char* COLOR_BOLD_YELLOW = "\033[1;33m";
     constexpr const char* COLOR_BOLD_CYAN   = "\033[1;36m";
-    constexpr const char* COLOR_BOLD_WHITE  = "\033[1;37m"; // Pour faire ressortir le texte
+    constexpr const char* COLOR_BOLD_WHITE  = "\033[1;37m";
     constexpr const char* COLOR_RESET       = "\033[0m";
 
 

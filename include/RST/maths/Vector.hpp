@@ -1,6 +1,9 @@
 #pragma once
 
 #include <iostream>
+#include <cmath>
+#include <limits>
+#include <stdexcept>
 
 namespace RST::Maths {
 
@@ -15,67 +18,206 @@ namespace RST::Maths {
         Vector2D(T x, T y): _x(x), _y(y) {};
     
         ~Vector2D() = default;
+
+        constexpr void set(const T& x, const T& y) {_x = x; _y = y;};
+        constexpr T getX() const noexcept {return _x;};
+        constexpr T getY() const noexcept {return _y;};
+        constexpr T& operator[](const std::size_t n) {
+            switch (n) {
+                case 0: return _x;
+                case 1: return _y;
+                default: throw std::out_of_range("Array index out of bounds");
+            }
+        };
+
+        constexpr Vector2D operator+() const {
+            return *this;
+        }
+        constexpr Vector2D operator-() const {
+            return Vector2D(-_x, -_y);
+        }
     
-        T getX() const { return _x; };
-        T getY() const { return _y; };
-    
-        void setX(T newX) { _x = newX; };
-        void setY(T newY) { _y = newY; };
-    
-        Vector2D& Add(const Vector2D& vec) {
-            _x += vec.getX();
-            _y += vec.getY();
-    
+        constexpr Vector2D& operator+=(const Vector2D& v) noexcept { _x += v._x; _y += v._y; return *this; };
+        constexpr Vector2D& operator-=(const Vector2D& v) noexcept { _x -= v._x; _y -= v._y; return *this; };
+        constexpr Vector2D& operator*=(const Vector2D& v) noexcept { _x *= v._x; _y *= v._y; return *this; };
+        constexpr Vector2D& operator/=(const Vector2D& v) {
+            if constexpr (std::is_floating_point_v<T>) {
+                if (std::abs(v._x) < std::numeric_limits<T>::epsilon() || std::abs(v._y) < std::numeric_limits<T>::epsilon())
+                    throw std::invalid_argument("Division by zero");
+            } else {
+                if (v._x == 0 || v._y == 0)
+                    throw std::invalid_argument("Division by zero");
+            }
+            _x /= v._x; _y /= v._y;
             return *this;
         };
-        Vector2D& Substract(const Vector2D& vec) {
-            _x -= vec.getX();
-            _y -= vec.getY();
-    
+
+        constexpr Vector2D& operator*=(T s) {
+            _x *= s;
+            _y *= s;
             return *this;
         };
-        Vector2D& Multiply(const Vector2D& vec) {
-            _x *= vec.getX();
-            _y *= vec.getY();
-    
+        constexpr Vector2D& operator/=(T s) {
+            if (s == 0)
+                throw std::invalid_argument("Division by zero");
+            _x /= s;
+            _y /= s;
             return *this;
         };
-        Vector2D& Divide(const Vector2D& vec) {
-            _x /= vec.getX();
-            _y /= vec.getY();
-    
+        constexpr Vector2D& operator+=(T s) {
+            _x += s;
+            _y += s;
             return *this;
         };
-    
-        Vector2D& operator+=(const Vector2D& vec) {return this->Add(vec);};
-        Vector2D& operator-=(const Vector2D& vec) {return this->Substract(vec);};
-        Vector2D& operator*=(const Vector2D& vec) {return this->Multiply(vec);};
-        Vector2D& operator/=(const Vector2D& vec) {return this->Divide(vec);};
+        constexpr Vector2D& operator-=(T s) {
+            _x -= s;
+            _y -= s;
+            return *this;
+        };
+
+        constexpr T dot(const Vector2D& v) const { return _x * v._x + _y * v._y; };
+
     };
     
     template<typename T>
-    Vector2D<T>& operator+(Vector2D<T>& v1, const Vector2D<T>& v2) {return v1.Add(v2);};
+    constexpr Vector2D<T> operator+(Vector2D<T> lhs, const Vector2D<T>& rhs) noexcept { return lhs += rhs; };
+    template<typename T>
+    constexpr Vector2D<T> operator-(Vector2D<T> lhs, const Vector2D<T>& rhs) noexcept { return lhs -= rhs; };
+    template<typename T>
+    constexpr Vector2D<T> operator*(Vector2D<T> lhs, const Vector2D<T>& rhs) noexcept { return lhs *= rhs; };
+    template<typename T>
+    constexpr Vector2D<T> operator/(Vector2D<T> lhs, const Vector2D<T>& rhs) { return lhs /= rhs; };
+
+    template<typename T>
+    constexpr Vector2D<T> operator*(Vector2D<T> v, T s) noexcept { return v *= s; };
+    template<typename T>
+    constexpr Vector2D<T> operator/(Vector2D<T> v, T s) { return v /= s; };
+    template<typename T>
+    constexpr Vector2D<T> operator+(Vector2D<T> v, T s) noexcept { return v += s; };
+    template<typename T>
+    constexpr Vector2D<T> operator-(Vector2D<T> v, T s) noexcept { return v -= s; };
     
     template<typename T>
-    Vector2D<T>& operator-(Vector2D<T>& v1, const Vector2D<T>& v2) {return v1.Substract(v2);};
-    
-    template<typename T>
-    Vector2D<T>& operator*(Vector2D<T>& v1, const Vector2D<T>& v2) {return v1.Multiply(v2);};
-    
-    template<typename T>
-    Vector2D<T>& operator/(Vector2D<T>& v1, const Vector2D<T>& v2) {return v1.Divide(v2);};
-    
-    template<typename T>
-    bool operator==(const Vector2D<T>& vec1, const Vector2D<T>& vec2) {
-        return (vec1.getX() == vec2.getX() && vec1.getY() == vec2.getY());
+    constexpr bool operator==(const Vector2D<T>& lhs, const Vector2D<T>& rhs) noexcept {
+        return (lhs.getX() == rhs.getX() && lhs.getY() == rhs.getY());
     }
+    template<typename T>
+    constexpr bool operator!=(const Vector2D<T>& lhs, const Vector2D<T>& rhs) noexcept { return !(lhs == rhs); }
 
     template<typename T>
     std::ostream& operator<<(std::ostream& os, const Vector2D<T>& vec) {
-        os << "(" << vec.getX() << ", " << vec.getY() << ")";
-        return os;
+        return os << "(" << vec.getX() << ", " << vec.getY() << ")";
     }
     
     using Vec2f = Vector2D<float>;
     using Vec2i = Vector2D<int>;
+
+
+    template<typename T>
+    struct Vector3D {
+        T _x{}, _y{}, _z{};
+
+        constexpr Vector3D() noexcept = default;
+        constexpr Vector3D(T x, T y, T z) noexcept : _x(x), _y(y), _z(z) {}
+
+        constexpr void set(const T& x, const T& y, const T& z) {_x = x; _y = y; _z = z;};
+        constexpr T getX() const noexcept {return _x;};
+        constexpr T getY() const noexcept {return _y;};
+        constexpr T getZ() const noexcept {return _z;};
+        constexpr T& operator[](const std::size_t n) {
+            switch (n) {
+                case 0: return _x;
+                case 1: return _y;
+                case 2: return _z;
+                default: throw std::out_of_range("Array index out of bounds");
+            }
+        };
+
+        constexpr Vector3D operator+() const {
+            return *this;
+        }
+
+        constexpr Vector3D operator-() const noexcept {
+            return Vector3D(-_x, -_y, -_z);
+        };
+
+        constexpr Vector3D& operator+=(const Vector3D& v) noexcept { _x += v._x; _y += v._y; _z += v._z; return *this; };
+        constexpr Vector3D& operator-=(const Vector3D& v) noexcept { _x -= v._x; _y -= v._y; _z -= v._z; return *this; };
+        constexpr Vector3D& operator*=(const Vector3D& v) noexcept { _x *= v._x; _y *= v._y; _z *= v._z; return *this; };
+        constexpr Vector3D& operator/=(const Vector3D& v) {
+            if constexpr (std::is_floating_point_v<T>) {
+                if (std::abs(v._x) < std::numeric_limits<T>::epsilon() || std::abs(v._y) < std::numeric_limits<T>::epsilon() || std::abs(v._z) < std::numeric_limits<T>::epsilon())
+                    throw std::invalid_argument("Division by zero");
+            } else {
+                if (v._x == 0 || v._y == 0 || v._z == 0)
+                    throw std::invalid_argument("Division by zero");
+            }
+            _x /= v._x; _y /= v._y; _z /= v._z;
+            return *this;
+        };
+
+        constexpr Vector3D& operator*=(T s) noexcept {
+            _x *= s;
+            _y *= s;
+            _z *= s;
+            return *this;
+        };
+        constexpr Vector3D& operator/=(T s) { 
+            if (s == 0)
+                throw std::invalid_argument("Division by zero");
+            _x /= s;
+            _y /= s;
+            _z /= s;
+            return *this;
+        };
+        constexpr Vector3D& operator+=(T s) noexcept {
+            _x += s;
+            _y += s;
+            _z += s;
+            return *this;
+        };
+        constexpr Vector3D& operator-=(T s) noexcept {
+            _x -= s;
+            _y -= s;
+            _z -= s;
+            return *this; 
+        };
+
+        constexpr T dot(const Vector3D& v) const noexcept { return _x * v._x + _y * v._y + _z * v._z; };
+    };
+
+    template<typename T>
+    constexpr Vector3D<T> operator+(Vector3D<T> lhs, const Vector3D<T>& rhs) noexcept { return lhs += rhs; };
+    template<typename T>
+    constexpr Vector3D<T> operator-(Vector3D<T> lhs, const Vector3D<T>& rhs) noexcept { return lhs -= rhs; };
+    template<typename T>
+    constexpr Vector3D<T> operator*(Vector3D<T> lhs, const Vector3D<T>& rhs) noexcept { return lhs *= rhs; };
+    template<typename T>
+    constexpr Vector3D<T> operator/(Vector3D<T> lhs, const Vector3D<T>& rhs) { return lhs /= rhs; };
+
+    template<typename T>
+    constexpr Vector3D<T> operator*(Vector3D<T> v, T s) noexcept { return v *= s; };
+    template<typename T>
+    constexpr Vector3D<T> operator/(Vector3D<T> v, T s) { return v /= s; };
+    template<typename T>
+    constexpr Vector3D<T> operator+(Vector3D<T> v, T s) noexcept { return v += s; };
+    template<typename T>
+    constexpr Vector3D<T> operator-(Vector3D<T> v, T s) noexcept { return v -= s; };
+
+    template<typename T>
+    constexpr bool operator==(const Vector3D<T>& lhs, const Vector3D<T>& rhs) noexcept {
+        return (lhs.getX()== rhs.getX() && lhs.getY()== rhs.getY() && lhs.getZ() == rhs.getZ());
+    }
+
+    template<typename T>
+    constexpr bool operator!=(const Vector3D<T>& lhs, const Vector3D<T>& rhs) noexcept { return !(lhs == rhs); }
+
+    template<typename T>
+    std::ostream& operator<<(std::ostream& os, const Vector3D<T>& vec) {
+        return os << "(" << vec.getX() << ", " << vec.getY() << ", " << vec.getZ() << ")";
+    }
+
+    using Vec3f = Vector3D<float>;
+    using Vec3i = Vector3D<int>;
+    
 }
