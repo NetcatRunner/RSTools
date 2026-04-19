@@ -18,11 +18,15 @@
   <img src="https://img.shields.io/badge/CMake-064F8C?style=flat-square&logo=cmake&logoColor=white" alt="CMake">
   <img src="https://img.shields.io/badge/Platform-Linux%20%7C%20Windows%20%7C%20macOS-lightgrey?style=flat-square" alt="Supported Platforms">
   <br>
-  <img src="https://img.shields.io/github/v/release/your_username/RSTools?style=flat-square&logo=github&color=blue" alt="Latest Release">
-  <img src="https://img.shields.io/github/license/your_username/RSTools?style=flat-square&color=yellow" alt="License: MIT">
+  <img src="https://img.shields.io/github/v/release/NetcatRunner/RSTools?style=flat-square&logo=github&color=blue" alt="Latest Release">
+  <img src="https://img.shields.io/github/license/NetcatRunner/RSTools?style=flat-square&color=yellow" alt="License: MIT">
   <br>
   <img src="https://img.shields.io/badge/Contributions-Welcome-4EAA25?style=flat-square" alt="Contributions Welcome">
   <img src="https://img.shields.io/badge/Open_Source-%E2%9D%A4-red?style=flat-square" alt="Open Source Love">
+  <br>
+  <a href="https://github.com/NetcatRunner/RSTools/actions/workflows/ci.yaml">
+    <img src="https://github.com/NetcatRunner/RSTools/actions/workflows/ci.yaml/badge.svg" alt="Build Status">
+  </a>
 </div>
 
 ---
@@ -157,4 +161,4 @@ Join the community and help us build the ultimate C++ utility toolkit\!
 
 ## 📄 License
 
-Distributed under the MIT License. See `LICENSE` for more information.
+Distributed under the --- License. See `LICENSE` for more information.
