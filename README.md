@@ -1,6 +1,6 @@
 <div align="center">
   <h1>🛠️ RSTools (RSLib)</h1>
-  <p><em>The versatile, all-in-one C++ utility toolset of Romain Super Librairie</em></p>
+  <p><em>The versatile, all-in-one C++ utility toolset of R Super Librairie</em></p>
 
   <p align="center">
     A comprehensive C++17/20 utility library featuring string manipulation, command-line parsing, logging, and math tools for any project.
