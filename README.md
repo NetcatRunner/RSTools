@@ -19,7 +19,7 @@
   <img src="https://img.shields.io/badge/Platform-Linux%20%7C%20Windows%20%7C%20macOS-lightgrey?style=flat-square" alt="Supported Platforms">
   <br>
   <img src="https://img.shields.io/github/v/release/NetcatRunner/RSTools?style=flat-square&logo=github&color=blue" alt="Latest Release">
-  <img src="https://img.shields.io/github/license/NetcatRunner/RSTools?style=flat-square&color=yellow" alt="License: MIT">
+  <img src="https://img.shields.io/github/license/NetcatRunner/RSTools?style=flat-square" alt="License: MIT">
   <br>
   <img src="https://img.shields.io/badge/Contributions-Welcome-4EAA25?style=flat-square" alt="Contributions Welcome">
   <img src="https://img.shields.io/badge/Open_Source-%E2%9D%A4-red?style=flat-square" alt="Open Source Love">
