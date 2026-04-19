@@ -17,4 +17,30 @@ namespace RST::String {
         
         return result;
     }
+
+    std::vector<std::string> SplitStringWithQuotes(const std::string& str, const std::string& delimiters, char quote) {
+        std::vector<std::string> result;
+        std::string currentToken;
+        bool inQuotes = false;
+        bool inToken = false;
+
+        for (const char c : str) {
+            if (c == quote) {
+                inQuotes = !inQuotes;
+            } else if (delimiters.find(c) != std::string::npos && !inQuotes) {
+                if (inToken) {
+                    result.push_back(currentToken);
+                    currentToken.clear();
+                    inToken = false;
+                }
+            } else {
+                currentToken += c;
+                inToken = true;
+            }
+        }
+        if (inToken)
+            result.push_back(currentToken);
+
+        return result;
+    }
 }

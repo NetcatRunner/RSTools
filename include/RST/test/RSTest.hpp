@@ -21,16 +21,15 @@ namespace RST::RSTester {
     constexpr const char* COLOR_BOLD_WHITE  = "\033[1;37m";
     constexpr const char* COLOR_RESET       = "\033[0m";
 
-
     struct TestAbortException : public std::exception {};
 
     template <typename T>
     constexpr std::string try_tostr(const T& t){
-    if constexpr(requires{ (std::ostringstream() << t).str(); }){
-        return (std::ostringstream() << std::boolalpha << t).str();
-    } else {
-        return "<obj>";
-    }
+        if constexpr(requires{ (std::ostringstream() << t).str(); }){
+            return (std::ostringstream() << std::boolalpha << t).str();
+        } else {
+            return "<obj>";
+        }
     }
 
     struct info_t {
