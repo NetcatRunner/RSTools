@@ -1,47 +1,39 @@
 #pragma once
 
-#include <iostream>
-#include <vector>
-#include <sstream>
-#include <chrono>
-#include <memory>
+#include "RST/log/LogLevel.hpp"
+#include "RST/log/LogMessage.hpp"
+#include "RST/log/Logger.hpp"
+#include "RST/log/LogRegistry.hpp"
+#include "RST/log/ScopedTimer.hpp"
 
-#include "Sinks/Sink.hpp"
-#include "LogMessage.hpp"
-#include "LogLevel.hpp"
+#include "RST/log/Format/Formatter.hpp"
+
+#include "RST/log/Sinks/ISink.hpp"
+#include "RST/log/Sinks/NullSink.hpp"
+#include "RST/log/Sinks/OStreamSink.hpp"
+#include "RST/log/Sinks/CallbackSink.hpp"
+#include "RST/log/Sinks/ConsoleSink.hpp"
+#include "RST/log/Sinks/FileSink.hpp"
+#include "RST/log/Sinks/RotatingFileSink.hpp"
 
 namespace RST::Log {
 
-    class Log
-    {
-    private:
-        const std::string _name;
-        std::vector<sink_ptr> _sinks;
-    public:
-        Log() = delete;
-        Log(std::string name) : _name(name) {};
-        Log(std::string name, std::vector<sink_ptr>::iterator begin, std::vector<sink_ptr>::iterator end): _name(name), _sinks(begin, end) {};
-        Log(std::string name, std::vector<sink_ptr> sinks): _name(name), _sinks(sinks.begin(), sinks.end()) {};
-        Log(std::string name, sink_ptr sink): _name(std::move(name)), _sinks{std::move(sink)} {};
 
-        void AddSink(sink_ptr sink) { _sinks.push_back(sink); };
+#define RST_LOG(lvl, ...) RST::Log::Registry::defaultLogger()->log((lvl), RST_SOURCE_LOCATION, __VA_ARGS__)
 
-        template<typename... Args>
-        void LogPrint(LogLevel level,  Args&&... args)
-        {
-            if (_sinks.empty())
-                return;
+#define LOG_TRACE(...)  RST_LOG(RST::Log::LogLevel::Trace, __VA_ARGS__)
+#define LOG_DEBUG(...)  RST_LOG(RST::Log::LogLevel::Debug, __VA_ARGS__)
+#define LOG_INFO(...)   RST_LOG(RST::Log::LogLevel::Info,  __VA_ARGS__)
+#define LOG_WARN(...)   RST_LOG(RST::Log::LogLevel::Warn,  __VA_ARGS__)
+#define LOG_ERROR(...)  RST_LOG(RST::Log::LogLevel::Error, __VA_ARGS__)
+#define LOG_FATAL(...)  RST_LOG(RST::Log::LogLevel::Fatal, __VA_ARGS__)
 
-            std::stringstream ss;
-            (ss << ... << args);
+#define RST_LOG_L(logger, lvl, ...) (logger)->log((lvl), RST_SOURCE_LOCATION, __VA_ARGS__)
 
-            LogMessage msg = {level, ss.str(),_name, std::chrono::system_clock::now()};
-
-            for (const auto& sink : _sinks) {
-                sink->log(msg);
-            }
-        }
-    };
-    using log_ptr = std::shared_ptr<Log>;
-
+#define LOG_TRACE_L(logger, ...)  RST_LOG_L(logger, RST::Log::LogLevel::Trace, __VA_ARGS__)
+#define LOG_DEBUG_L(logger, ...)  RST_LOG_L(logger, RST::Log::LogLevel::Debug, __VA_ARGS__)
+#define LOG_INFO_L(logger, ...)   RST_LOG_L(logger, RST::Log::LogLevel::Info,  __VA_ARGS__)
+#define LOG_WARN_L(logger, ...)   RST_LOG_L(logger, RST::Log::LogLevel::Warn,  __VA_ARGS__)
+#define LOG_ERROR_L(logger, ...)  RST_LOG_L(logger, RST::Log::LogLevel::Error, __VA_ARGS__)
+#define LOG_FATAL_L(logger, ...)  RST_LOG_L(logger, RST::Log::LogLevel::Fatal, __VA_ARGS__)
 }

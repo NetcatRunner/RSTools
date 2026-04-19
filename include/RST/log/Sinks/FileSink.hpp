@@ -1,21 +1,24 @@
 #pragma once
-
 #include "ASink.hpp"
 
 #include <fstream>
+#include <string>
 
 namespace RST::Log {
 
-    class FileSink : public ASink
-    {
-    private:
-        std::ofstream m_File;
+class FileSink : public ASink {
+private:
+    std::string   _filepath;
+    std::ofstream _file;
+protected:
+    void log(const LogMessage& msg) override;
+public:
+    FileSink(std::string_view filepath, bool truncate = false);
+    ~FileSink() override;
 
-    public:
+    void flush() override;
 
-        FileSink(const std::string& path): m_File(path, std::ios::app) {}
+    const std::string& filepath() const noexcept { return _filepath; };
+};
 
-        void log(const LogMessage& msg) override;
-    };
-
-}
+} // namespace RST::Log

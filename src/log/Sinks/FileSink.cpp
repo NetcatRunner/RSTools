@@ -1,19 +1,29 @@
 #include "RST/log/Sinks/FileSink.hpp"
-
-#include "RST/log/LogLevel.hpp"
-#include "RST/log/LogMessage.hpp"
-
-#include <chrono>
-#include <iomanip>
+#include <stdexcept>
 
 namespace RST::Log {
-    void Log::FileSink::log(const LogMessage& msg)
-    {
-        auto time = std::chrono::system_clock::to_time_t(msg.time);
-    
-        m_File << "[" << std::put_time(std::localtime(&time), "%H:%M:%S") << "]"
-               << "[" << msg.level << "]"
-               << "[" << msg.category << "] "
-               << msg.message << std::endl;
+
+FileSink::FileSink(std::string_view filepath, bool truncate): _filepath(filepath)
+{
+    auto mode = std::ios::out | (truncate ? std::ios::trunc : std::ios::app);
+    _file.open(_filepath, mode);
+    if (!_file.is_open())
+        throw std::runtime_error("FileSink: impossible d'ouvrir " + _filepath);
+}
+
+FileSink::~FileSink() {
+    if (_file.is_open()) {
+        _file.flush();
+        _file.close();
     }
 }
+
+void FileSink::log(const LogMessage& msg) {
+    _file << formatted(msg) << '\n';
+}
+
+void FileSink::flush() {
+    _file.flush();
+}
+
+} // namespace RST::Log

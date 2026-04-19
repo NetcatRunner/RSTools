@@ -5,19 +5,24 @@
 #include <unordered_map>
 #include <string>
 
-#include "../LogLevel.hpp"
-
 namespace RST::Log {
 
-    class ConsoleSink  : public ASink
-    {
+    class ConsoleSink : public ASink {    
     private:
+        std::ostream& _target;
+        bool _colorEnabled;
         std::unordered_map<LogLevel, std::string> _colors;
-    public:
-        ConsoleSink();
-
+    protected:
         void log(const LogMessage& msg) override;
-        void setColor(LogLevel level, const std::string& color_code);
+    public:
+        ConsoleSink(std::ostream& target = std::cout);
+
+        void setColor(LogLevel level, std::string_view color_code);
+
+        void setColorEnabled(bool enabled) noexcept { _colorEnabled = enabled; }
+
+        void flush() override { _target.flush(); }
+
     };
 
 }
