@@ -77,6 +77,15 @@ namespace RST::Maths {
 
         constexpr T dot(const Vector2D& v) const { return _x * v._x + _y * v._y; };
 
+        constexpr auto length() const {return std::sqrt(_x *_x + _y * _y);};
+        constexpr Vector2D& normalize() {
+            auto len = length();
+            if (len > std::numeric_limits<T>::epsilon())
+                *this /= len;
+            return *this;
+        }
+        constexpr Vector2D normalized() const { return Vector2D(*this).normalize(); };
+
     };
     
     template<typename T>
@@ -184,6 +193,15 @@ namespace RST::Maths {
         };
 
         constexpr T dot(const Vector3D& v) const noexcept { return _x * v._x + _y * v._y + _z * v._z; };
+
+        constexpr auto length() const {return std::sqrt(_x *_x + _y * _y + _z * _z);};
+        constexpr Vector3D& normalize() {
+            auto len = length();
+            if (len > std::numeric_limits<T>::epsilon())
+                *this /= len;
+            return *this;
+        }
+        constexpr Vector3D normalized() const { return Vector2D(*this).normalize(); };
     };
 
     template<typename T>
