@@ -7,4 +7,5 @@
 #include "RST/string/String.hpp"
 #include "RST/system/System.hpp"
 #include "RST/time/Time.hpp"
+#include "RST/color/Color.hpp"
 #include "RST/test/RSTest.hpp"
