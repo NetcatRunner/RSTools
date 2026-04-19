@@ -10,10 +10,16 @@
 
 namespace RST::RSTester {
 
-    constexpr const char* COLOR_GREEN   = "\033[32m";
-    constexpr const char* COLOR_RED     = "\033[31m";
-    constexpr const char* COLOR_YELLOW  = "\033[33m";
-    constexpr const char* COLOR_RESET   = "\033[0m";
+    constexpr const char* COLOR_GREEN       = "\033[32m";
+    constexpr const char* COLOR_RED         = "\033[31m";
+    constexpr const char* COLOR_YELLOW      = "\033[33m";
+    
+    constexpr const char* COLOR_BOLD_GREEN  = "\033[1;32m";
+    constexpr const char* COLOR_BOLD_RED    = "\033[1;31m";
+    constexpr const char* COLOR_BOLD_YELLOW = "\033[1;33m";
+    constexpr const char* COLOR_BOLD_CYAN   = "\033[1;36m";
+    constexpr const char* COLOR_BOLD_WHITE  = "\033[1;37m"; // Pour faire ressortir le texte
+    constexpr const char* COLOR_RESET       = "\033[0m";
 
 
     struct TestAbortException : public std::exception {};
@@ -104,15 +110,17 @@ namespace RST::RSTester {
         int RunAllTests() {
             auto time_start_global = std::chrono::high_resolution_clock::now();
 
-            std::cout << COLOR_YELLOW << "[==========] " << COLOR_RESET  << "Running " << _tests.size() << " tests.\n";
+            std::cout << COLOR_BOLD_YELLOW << "[==========] " << COLOR_RESET  << "Running " << _tests.size() << " tests.\n";
             int failed_count = 0;
+            int total_tests = 0;
 
             for (const auto& t : _tests) {
-                std::cout << COLOR_YELLOW << "\n[ RUN ] " << COLOR_RESET << t.name << "\n";
+                std::cout << COLOR_BOLD_CYAN << "\n[ RUN ] " << COLOR_RESET << COLOR_BOLD_WHITE << t.name << "\n" << COLOR_RESET;
                 bool passed = true;
                 auto time_start_test = std::chrono::high_resolution_clock::now();
 
                 try {
+                    total_tests++;
                     t.function();
                 } catch (const TestAbortException&) {
                     std::cout << "    -> Test aborted due to fatal failure.\n";
@@ -136,12 +144,14 @@ namespace RST::RSTester {
             auto time_end_global = std::chrono::high_resolution_clock::now();
             auto total_duration_ms = std::chrono::duration_cast<std::chrono::milliseconds>(time_end_global - time_start_global).count();
 
-            std::cout << COLOR_YELLOW << "\n[==========] " << COLOR_RESET << "Test execution finished. (" << total_duration_ms << " ms total)\n\n";
+            std::cout << COLOR_BOLD_YELLOW << "\n[==========] " << COLOR_RESET << "Test execution finished. (" << total_duration_ms << " ms total)\n";
+            std::cout << COLOR_BOLD_CYAN << "[ RESULT ] " << COLOR_RESET << total_tests - failed_count << "/" << total_tests << " tests passed (" << ((total_tests > 0) ? ((total_tests - failed_count) * 100 / total_tests) : 0) << "%)\n\n";
+
 
             if (failed_count > 0) {
-                std::cout << COLOR_RED << "[ FAILED ] " << COLOR_RESET  << failed_count << " tests failed.\n";
+                std::cout << COLOR_BOLD_RED << "[ FAILED ] " << COLOR_RESET << COLOR_BOLD_WHITE << failed_count << " tests failed.\n" << COLOR_RESET;
             } else {
-                std::cout << COLOR_GREEN << "[ PASSED ] " << COLOR_RESET  << "All tests passed!\n";
+                std::cout << COLOR_BOLD_GREEN << "[ PASSED ] " << COLOR_RESET << COLOR_BOLD_WHITE << "All tests passed!\n" << COLOR_RESET;
             }
             return failed_count;
         }
