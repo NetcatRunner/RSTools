@@ -40,21 +40,21 @@ const std::unordered_map<Formatter::Token::Type, std::function<void(const LogMes
     {Token::Type::LoggerName, [](const LogMessage& msg, const std::tm&, int, std::string& dest) { dest += msg.category; }},
     {Token::Type::Message, [](const LogMessage& msg, const std::tm&, int, std::string& dest) { dest += msg.message; }},
     {Token::Type::SourceFile, [](const LogMessage& msg, const std::tm&, int, std::string& dest) {
-        if (!msg.source.valid())
+        if (!msg.source.has_value() || !msg.source->valid())
             return;
-        if (!msg.source.file)
+        if (!msg.source->file)
             return;
-        std::string_view sv(msg.source.file);
+        std::string_view sv(msg.source->file);
         auto pos = sv.find_last_of("/\\");
         dest += (pos == std::string_view::npos) ? sv : sv.substr(pos + 1);
     }},
     {Token::Type::SourceFunc, [](const LogMessage& msg, const std::tm&, int, std::string& dest) {
-        if (msg.source.valid())
-            dest += msg.source.func;
+        if (msg.source.has_value() && msg.source->valid())
+            dest += msg.source->func;
     }},
     {Token::Type::SourceLine, [](const LogMessage& msg, const std::tm&, int, std::string& dest) {
-        if (msg.source.valid())
-            dest += std::to_string(msg.source.line);}},
+        if (msg.source.has_value() && msg.source->valid())
+            dest += std::to_string(msg.source->line);}},
     {Token::Type::ProcessId, [](const LogMessage&, const std::tm&, int, std::string& dest) { dest += std::to_string(RST_GETPID()); }},
 };
 

@@ -71,7 +71,7 @@ namespace RST::RSTester {
 
     #define DECOMPOSE_CMP_OP(expr, lit) RST::RSTester::destruct_t{RST::RSTester::info_t{lit ""}} < expr
 
-    void check_internal(info_t i, std::string_view additional_info = ""){
+    inline void check_internal(info_t i, std::string_view additional_info = ""){
         if (!i.result) {
             std::cerr << "  " << i.sl.file_name() << ":" << i.sl.line() << " -> " 
                       << COLOR_RED << "FAILED\n" << COLOR_RESET
@@ -154,7 +154,7 @@ namespace RST::RSTester {
     #define CONCAT(x, y) CONCAT_IMPL(x, y)
     #define TEST_CASE(name) \
         static void name(); \
-        int CONCAT(impl, __LINE__) = RST::RSTester::TestRunner::GetInstance().AddTest({name, #name}); \
+        static int CONCAT(impl, __LINE__) = RST::RSTester::TestRunner::GetInstance().AddTest({name, #name}); \
         static void name()
 
     #define RUN_ALL_TESTS() RST::RSTester::TestRunner::GetInstance().RunAllTests()

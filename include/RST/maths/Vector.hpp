@@ -66,6 +66,11 @@ namespace RST::Maths {
     Vector2D<T>& operator/(Vector2D<T>& v1, const Vector2D<T>& v2) {return v1.Divide(v2);};
     
     template<typename T>
+    bool operator==(const Vector2D<T>& vec1, const Vector2D<T>& vec2) {
+        return (vec1.getX() == vec2.getX() && vec1.getY() == vec2.getY());
+    }
+
+    template<typename T>
     std::ostream& operator<<(std::ostream& os, const Vector2D<T>& vec) {
         os << "(" << vec.getX() << ", " << vec.getY() << ")";
         return os;

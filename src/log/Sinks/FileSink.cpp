@@ -8,7 +8,7 @@ FileSink::FileSink(std::string_view filepath, bool truncate): _filepath(filepath
     auto mode = std::ios::out | (truncate ? std::ios::trunc : std::ios::app);
     _file.open(_filepath, mode);
     if (!_file.is_open())
-        throw std::runtime_error("FileSink: impossible d'ouvrir " + _filepath);
+        throw std::runtime_error("FileSink: impossible to open " + _filepath);
 }
 
 FileSink::~FileSink() {

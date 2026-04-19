@@ -19,7 +19,7 @@ namespace RST::Log {
 
         void setColor(LogLevel level, std::string_view color_code);
 
-        void setColorEnabled(bool enabled) noexcept { _colorEnabled = enabled; }
+        void setColorEnabled(bool enabled) { _colorEnabled = enabled; }
 
         void flush() override { _target.flush(); }
 

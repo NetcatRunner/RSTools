@@ -1,9 +1,9 @@
 #pragma once
 
-
 #include <iostream>
 #include <chrono>
 #include <string>
+#include <optional>
 #include "LogLevel.hpp"
 
 namespace RST::Log {
@@ -24,11 +24,11 @@ namespace RST::Log {
         LogLevel                              level    = LogLevel::Info;
         std::string                           category;
         std::string                           message;
-        SourceLocation                        source;
+        std::optional<SourceLocation>         source;
 
         LogMessage() = default;
 
-        LogMessage(LogLevel lvl, std::string cat, std::string msg, SourceLocation src = {})
+        LogMessage(LogLevel lvl, std::string cat, std::string msg, std::optional<SourceLocation> src = std::nullopt)
             : time(std::chrono::system_clock::now()), level(lvl), category(std::move(cat)), message(std::move(msg)), source(src) {}
     };
 }

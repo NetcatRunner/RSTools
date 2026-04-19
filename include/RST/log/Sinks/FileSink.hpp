@@ -18,7 +18,7 @@ public:
 
     void flush() override;
 
-    const std::string& filepath() const noexcept { return _filepath; };
+    const std::string& filepath() const { return _filepath; };
 };
 
 } // namespace RST::Log
