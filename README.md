@@ -9,7 +9,7 @@
     ·
     <a href="#-contributing-community-first"><strong>Become a Contributor</strong></a>
     ·
-    <a href="https://github.com/your_username/RSTools/issues">Report a Bug</a>
+    <a href="https://github.com/NetcatRunner/RSTools/issues">Report a Bug</a>
   </p>
 </div>
 
@@ -44,7 +44,7 @@
 
 ## 🚀 About the Project
 
-**RSTools** is the foundational utility toolkit of **RSLib** (*Romain Super Librairie*).
+**RSTools** is the foundational utility toolkit of **RSLib** (*R Super Librairie*).
 
 Born from the need to stop rewriting the same boilerplate code across different applications, RSTools provides a versatile, highly reusable set of C++ utilities designed to make everyday development faster, safer, and more efficient. Whether you are building a small personal script or a large-scale system architecture, RSTools has you covered with ready-to-use tools.
 
