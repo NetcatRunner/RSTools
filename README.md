@@ -161,4 +161,4 @@ Join the community and help us build the ultimate C++ utility toolkit\!
 
 ## 📄 License
 
-Distributed under the --- License. See `LICENSE` for more information.
+Distributed under the MIT License. See `LICENSE` for more information.
