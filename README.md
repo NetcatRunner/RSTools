@@ -97,29 +97,42 @@ Here is a quick glimpse of how easy it is to use RSTools in your main applicatio
 #include <memory>
 #include <iostream>
 
+int add(int a, int b) {return a + b;}
+
+TEST_CASE(simple_test) {
+  CHECK(3 == 3);
+  CHECK(add(4, 5) == 9);
+};
+
 int main(int argc, const char** argv) {
     // Example: Using the Logger and Parser
-    RST::Log::Log log("RST");
 
-    log.AddSink(std::make_shared<RST::Log::ConsoleSink>());
+    RST::Log::Logger logger("TestLogger");
 
-    log.LogPrint(RST::Log::LogLevel::Info, "Application started.");
+    logger.addSink(std::make_shared<RST::Log::ConsoleSink>());
+
+    logger.info("Application started.");
 
     RST::Parser::ArgParser parser;
     parser.addFlag({"--help", "-h"}, "Help message");
 
-    parser.parse(argc, argv);
-    if (parser.isSet("--help")) {
-        std::cout << "Usage: ./app [--verbose]\n";
+    try {
+        parser.parse(argc, argv);
+    } catch (const RST::Parser::HelpRequested& h) {
+        parser.printHelp();
         return 0;
+    } catch (const std::exception& e) {
+        logger.error(e.what());
+        parser.printHelp();
+        return 1;
     }
 
     // Example: Using String utilities
     std::string text = "   Hello RSTools!   ";
     std::cout << RST::String::LtrimCopy(text) << "\n";
 
-    log.LogPrint(RST::Log::LogLevel::Info, "Application started.");
-    return 0;
+    logger.log(RST::Log::LogLevel::Info, "Application stop.");
+    return RUN_ALL_TESTS();
 }
 
 ```
