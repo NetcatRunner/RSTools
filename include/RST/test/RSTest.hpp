@@ -77,6 +77,7 @@ namespace RST::RSTester {
     #define DECOMPOSE_CMP_OP(expr, lit) RST::RSTester::destruct_t{RST::RSTester::info_t{lit ""}} < expr
 
     inline void check_internal(info_t i, std::string_view additional_info = ""){
+        (void)additional_info;
         if (!i.result) {
             std::cerr << "  " << i.sl.file_name() << ":" << i.sl.line() << " -> " 
                       << COLOR_RED << "FAILED\n" << COLOR_RESET
