@@ -86,7 +86,7 @@ To integrate RSTools into your C++ project, follow these simple steps using CMak
     add_subdirectory(lib/RSTools)
 
     # Link it to your main executable
-    target_link_libraries(your_executable PRIVATE RSTools)
+    target_link_libraries(your_executable PRIVATE RST)
     ```
 
 -----
