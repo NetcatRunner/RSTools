@@ -7,14 +7,13 @@ namespace RST::Maths {
 
     template<typename T>
     T Random(const T &min, const T &max) {
-        static std::random_device dev;
-        static std::mt19937 rng(dev());
+        thread_local std::random_device dev;
+        thread_local std::mt19937 rng(dev());
 
         if constexpr (std::is_integral<T>::value) {
             std::uniform_int_distribution<T> dist(min, max);
             return dist(rng);
-
-        } else if (std::is_floating_point<T>::value) {
+        } else if constexpr (std::is_floating_point<T>::value) {
             std::uniform_real_distribution<T> dist(min, max);
             return dist(rng);
         } else {
