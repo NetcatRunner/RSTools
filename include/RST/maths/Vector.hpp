@@ -29,6 +29,8 @@ namespace RST::Maths {
                 default: throw std::out_of_range("Array index out of bounds");
             }
         };
+        constexpr T* data() noexcept { return &_x; };
+        constexpr const T* data() const noexcept { return &_x; };
 
         constexpr Vector2D operator+() const {
             return *this;
@@ -133,7 +135,7 @@ namespace RST::Maths {
         constexpr T getX() const noexcept {return _x;};
         constexpr T getY() const noexcept {return _y;};
         constexpr T getZ() const noexcept {return _z;};
-        constexpr T& operator[](const std::size_t n) {
+        constexpr T operator[](const std::size_t n) const {
             switch (n) {
                 case 0: return _x;
                 case 1: return _y;
@@ -141,6 +143,8 @@ namespace RST::Maths {
                 default: throw std::out_of_range("Array index out of bounds");
             }
         };
+        constexpr T* data() noexcept { return &_x; };
+        constexpr const T* data() const noexcept { return &_x; };
 
         constexpr Vector3D operator+() const {
             return *this;
@@ -193,15 +197,23 @@ namespace RST::Maths {
         };
 
         constexpr T dot(const Vector3D& v) const noexcept { return _x * v._x + _y * v._y + _z * v._z; };
+        constexpr Vector3D cross(const Vector3D& v) const noexcept {
+            return Vector3D(
+                _y * v._z - _z * v._y,
+                _z * v._x - _x * v._z,
+                _x * v._y - _y * v._x
+            );
+        };
 
-        constexpr auto length() const {return std::sqrt(_x *_x + _y * _y + _z * _z);};
-        constexpr Vector3D& normalize() {
+        constexpr auto length_sqrt() const noexcept { return (_x * _x + _y * _y + _z * _z); }
+        inline auto length() const noexcept { return std::sqrt(length_sqrt()); }
+        inline Vector3D& normalize() {
             auto len = length();
             if (len > std::numeric_limits<T>::epsilon())
                 *this /= len;
             return *this;
-        }
-        constexpr Vector3D normalized() const { return Vector2D(*this).normalize(); };
+        }        
+        inline Vector3D normalized() const noexcept { return Vector3D(*this).normalize(); }
     };
 
     template<typename T>
@@ -215,6 +227,8 @@ namespace RST::Maths {
 
     template<typename T>
     constexpr Vector3D<T> operator*(Vector3D<T> v, T s) noexcept { return v *= s; };
+    template<typename T>
+    constexpr Vector3D<T> operator*(T s, Vector3D<T> v) noexcept { return v *= s; };
     template<typename T>
     constexpr Vector3D<T> operator/(Vector3D<T> v, T s) { return v /= s; };
     template<typename T>
