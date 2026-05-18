@@ -25,9 +25,9 @@ namespace RST::Time {
         void stop();
 
         template <typename T>
-        T getElapsedMs() const { return getElapsedTime<T, std::milli>(); };
+        T getElapsedMs() const { return getElapsedTime<T, std::milli>(); }
 
         template <typename T>
-        T getElapsedSeconds() const{ return getElapsedTime<T, std::ratio<1>>(); };
+        T getElapsedSeconds() const{ return getElapsedTime<T, std::ratio<1>>(); }
     };
 }
