@@ -8,14 +8,11 @@
 namespace RST::Maths {
 
     template<typename T>
-    class Vector2D
-    {
-    private:
-        T _x{};
-        T _y{};
-    public:
-        Vector2D() = default;
-        Vector2D(T x, T y): _x(x), _y(y) {};
+    struct Vector2D {
+        T _x{}, _y{};
+
+        constexpr Vector2D() noexcept = default;
+        constexpr Vector2D(T x, T y) noexcept : _x(x), _y(y) {}
     
         ~Vector2D() = default;
 
