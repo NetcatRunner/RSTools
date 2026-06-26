@@ -76,6 +76,7 @@ namespace RST::Maths {
 
         constexpr T dot(const Vector2D& v) const { return _x * v._x + _y * v._y; };
 
+        constexpr auto length_sqrt() const noexcept { return (_x * _x + _y * _y); }
         constexpr auto length() const {return std::sqrt(_x *_x + _y * _y);};
         constexpr Vector2D& normalize() {
             auto len = length();
