@@ -86,6 +86,10 @@ namespace RST::Maths {
         }
         constexpr Vector2D normalized() const { return Vector2D(*this).normalize(); };
 
+        template<typename U>
+        constexpr Vector2D<U> to() const noexcept {
+            return Vector2D<U>(static_cast<U>(_x), static_cast<U>(_y));
+        }
     };
     
     template<typename T>
@@ -212,6 +216,11 @@ namespace RST::Maths {
             return *this;
         }        
         inline Vector3D normalized() const noexcept { return Vector3D(*this).normalize(); }
+
+        template<typename U>
+        constexpr Vector3D<U> to() const noexcept {
+            return Vector3D<U>(static_cast<U>(_x), static_cast<U>(_y), static_cast<U>(_z));
+        }
     };
 
     template<typename T>
