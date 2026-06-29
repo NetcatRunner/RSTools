@@ -244,6 +244,32 @@ namespace RST::Maths {
             return r;
         }
 
+        static Matrix<T, 4, 4> perspective(T fovYDeg, T aspect, T nearP, T farP) {
+            static_assert(Rows == 4 && Cols == 4, "perspective requires a 4x4 matrix");
+            const T fovYRad = fovYDeg * T(3.141592653589793) / T(180);
+            const T f = T(1) / std::tan(fovYRad / T(2));
+            Matrix<T, 4, 4> r(T(0));
+            r(0, 0) = f / aspect;
+            r(1, 1) = f;
+            r(2, 2) = (farP + nearP) / (nearP - farP);
+            r(2, 3) = (T(2) * farP * nearP) / (nearP - farP);
+            r(3, 2) = T(-1);
+            return r;
+        }
+
+        static Matrix<T, 4, 4> lookAt(const Vector3D<T>& eye, const Vector3D<T>& center, const Vector3D<T>& up) {
+            static_assert(Rows == 4 && Cols == 4, "lookAt requires a 4x4 matrix");
+            Vector3D<T> z = (eye - center).normalized();
+            Vector3D<T> x = up.cross(z).normalized();
+            Vector3D<T> y = z.cross(x);
+            Matrix<T, 4, 4> r(T(0));
+            r(0,0)=x.getX(); r(0,1)=x.getY(); r(0,2)=x.getZ(); r(0,3)=-x.dot(eye);
+            r(1,0)=y.getX(); r(1,1)=y.getY(); r(1,2)=y.getZ(); r(1,3)=-y.dot(eye);
+            r(2,0)=z.getX(); r(2,1)=z.getY(); r(2,2)=z.getZ(); r(2,3)=-z.dot(eye);
+            r(3,3)=T(1);
+            return r;
+        }
+
     private:
         T m[Rows * Cols];
     };
