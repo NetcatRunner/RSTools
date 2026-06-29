@@ -222,4 +222,49 @@ namespace RST::Maths {
             res(0, 0) =  c;
             res(0, 1) = -s;
             res(1, 0) =  s;
-           
+            res(1, 1) =  c;
+            
+            return res;
+        }
+
+        static constexpr Matrix<T, Rows, Cols> identity() noexcept {
+            return Matrix<T, Rows, Cols>();
+        }
+
+        static Matrix<T, 4, 4> ortho(T left, T right, T bottom, T top, T nearP = T(-1), T farP = T(1)) {
+            static_assert(Rows == 4 && Cols == 4, "ortho requires a 4x4 matrix");
+            Matrix<T, 4, 4> r(T(0));
+            r(0, 0) =  T(2) / (right - left);
+            r(1, 1) =  T(2) / (top - bottom);
+            r(2, 2) = -T(2) / (farP - nearP);
+            r(0, 3) = -(right + left) / (right - left);
+            r(1, 3) = -(top + bottom) / (top - bottom);
+            r(2, 3) = -(farP + nearP) / (farP - nearP);
+            r(3, 3) =  T(1);
+            return r;
+        }
+
+    private:
+        T m[Rows * Cols];
+    };
+
+    template <typename T> using Matrix4 = Matrix<T, 4, 4>;
+    template <typename T> using Matrix3 = Matrix<T, 3, 3>;
+
+    using Matrix4f = Matrix<float, 4, 4>;
+    using Matrix3f = Matrix<float, 3, 3>;
+    using Vector4f = Matrix<float, 4, 1>;
+    using Vector3f = Matrix<float, 3, 1>;
+
+    template <typename T, size_t Rows, size_t Cols>
+    std::ostream& operator<<(std::ostream& os, const Matrix<T, Rows, Cols>& mat) {
+        for (size_t i = 0; i < Rows; ++i) {
+            os << "[ ";
+            for (size_t j = 0; j < Cols; ++j) {
+                os << mat(i, j) << (j < Cols - 1 ? ", " : " ");
+            }
+            os << "]\n";
+        }
+        return os;
+    }
+}
