@@ -227,6 +227,23 @@ namespace RST::Maths {
             return res;
         }
 
+        static constexpr Matrix<T, Rows, Cols> identity() noexcept {
+            return Matrix<T, Rows, Cols>();
+        }
+
+        static Matrix<T, 4, 4> ortho(T left, T right, T bottom, T top, T nearP = T(-1), T farP = T(1)) {
+            static_assert(Rows == 4 && Cols == 4, "ortho requires a 4x4 matrix");
+            Matrix<T, 4, 4> r(T(0));
+            r(0, 0) =  T(2) / (right - left);
+            r(1, 1) =  T(2) / (top - bottom);
+            r(2, 2) = -T(2) / (farP - nearP);
+            r(0, 3) = -(right + left) / (right - left);
+            r(1, 3) = -(top + bottom) / (top - bottom);
+            r(2, 3) = -(farP + nearP) / (farP - nearP);
+            r(3, 3) =  T(1);
+            return r;
+        }
+
     private:
         T m[Rows * Cols];
     };
