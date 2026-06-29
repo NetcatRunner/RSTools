@@ -17,6 +17,15 @@ namespace RST::Color {
         constexpr bool operator!=(const Color& other) const {return !(*this == other);};
     
         constexpr std::uint32_t toHex() const {return (r << 24) | (g << 16) | (b << 8) | a;};
+
+        constexpr Color lerp(const Color& a, const Color& b, float t) noexcept {
+            return Color(
+                static_cast<decltype(a.r)>(a.r * (1.f - t) + b.r * t),
+                static_cast<decltype(a.g)>(a.g * (1.f - t) + b.g * t),
+                static_cast<decltype(a.b)>(a.b * (1.f - t) + b.b * t),
+                static_cast<decltype(a.a)>(a.a * (1.f - t) + b.a * t)
+            );
+        }
     };
 
     constexpr Color Black       {0, 0, 0, 255};
