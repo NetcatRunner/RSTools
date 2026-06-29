@@ -4,6 +4,7 @@
 #include <cmath>
 #include <limits>
 #include <stdexcept>
+#include <algorithm>
 
 namespace RST::Maths {
 
@@ -89,6 +90,14 @@ namespace RST::Maths {
         template<typename U>
         constexpr Vector2D<U> to() const noexcept {
             return Vector2D<U>(static_cast<U>(_x), static_cast<U>(_y));
+        }
+
+        constexpr Vector2D min(const Vector2D& v) const noexcept {
+            return Vector2D(std::min(_x, v._x), std::min(_y, v._y));
+        }
+
+        constexpr Vector2D max(const Vector2D& v) const noexcept {
+            return Vector2D(std::max(_x, v._x), std::max(_y, v._y));
         }
     };
     
@@ -220,6 +229,14 @@ namespace RST::Maths {
         template<typename U>
         constexpr Vector3D<U> to() const noexcept {
             return Vector3D<U>(static_cast<U>(_x), static_cast<U>(_y), static_cast<U>(_z));
+        }
+
+        constexpr Vector3D min(const Vector3D& v) const noexcept {
+            return Vector3D(std::min(_x, v._x), std::min(_y, v._y), std::min(_z, v._z));
+        }
+
+        constexpr Vector3D max(const Vector3D& v) const noexcept {
+            return Vector3D(std::max(_x, v._x), std::max(_y, v._y), std::max(_z, v._z));
         }
     };
 
