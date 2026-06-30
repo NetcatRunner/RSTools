@@ -4,3 +4,4 @@
 #include "Vector.hpp"
 #include "Random.hpp"
 #include "Matrix.hpp"
+#include "Utils.hpp"
