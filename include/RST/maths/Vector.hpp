@@ -17,7 +17,7 @@ namespace RST::Maths {
     
         ~Vector2D() = default;
 
-        constexpr void set(const T& x, const T& y) {x = x; y = y;};
+        constexpr void set(const T& newX, const T& newY) {x = newX; y = newY;};
         constexpr T getX() const noexcept {return x;};
         constexpr T getY() const noexcept {return y;};
         constexpr T& operator[](const std::size_t n) {
@@ -142,7 +142,7 @@ namespace RST::Maths {
         constexpr Vector3D() noexcept = default;
         constexpr Vector3D(T x, T y, T z) noexcept : x(x), y(y), z(z) {}
 
-        constexpr void set(const T& x, const T& y, const T& z) {x = x; y = y; z = z;};
+        constexpr void set(const T& newX, const T& newY, const T& newZ) {x = newX; y = newY; z = newZ;};
         constexpr T getX() const noexcept {return x;};
         constexpr T getY() const noexcept {return y;};
         constexpr T getZ() const noexcept {return z;};
