@@ -10,75 +10,75 @@ namespace RST::Maths {
 
     template<typename T>
     struct Vector2D {
-        T _x{}, _y{};
+        T x{}, y{};
 
         constexpr Vector2D() noexcept = default;
-        constexpr Vector2D(T x, T y) noexcept : _x(x), _y(y) {}
+        constexpr Vector2D(T x, T y) noexcept : x(x), y(y) {}
     
         ~Vector2D() = default;
 
-        constexpr void set(const T& x, const T& y) {_x = x; _y = y;};
-        constexpr T getX() const noexcept {return _x;};
-        constexpr T getY() const noexcept {return _y;};
+        constexpr void set(const T& x, const T& y) {x = x; y = y;};
+        constexpr T getX() const noexcept {return x;};
+        constexpr T getY() const noexcept {return y;};
         constexpr T& operator[](const std::size_t n) {
             switch (n) {
-                case 0: return _x;
-                case 1: return _y;
+                case 0: return x;
+                case 1: return y;
                 default: throw std::out_of_range("Array index out of bounds");
             }
         };
-        constexpr T* data() noexcept { return &_x; };
-        constexpr const T* data() const noexcept { return &_x; };
+        constexpr T* data() noexcept { return &x; };
+        constexpr const T* data() const noexcept { return &x; };
 
         constexpr Vector2D operator+() const {
             return *this;
         }
         constexpr Vector2D operator-() const {
-            return Vector2D(-_x, -_y);
+            return Vector2D(-x, -y);
         }
     
-        constexpr Vector2D& operator+=(const Vector2D& v) noexcept { _x += v._x; _y += v._y; return *this; };
-        constexpr Vector2D& operator-=(const Vector2D& v) noexcept { _x -= v._x; _y -= v._y; return *this; };
-        constexpr Vector2D& operator*=(const Vector2D& v) noexcept { _x *= v._x; _y *= v._y; return *this; };
+        constexpr Vector2D& operator+=(const Vector2D& v) noexcept { x += v.x; y += v.y; return *this; };
+        constexpr Vector2D& operator-=(const Vector2D& v) noexcept { x -= v.x; y -= v.y; return *this; };
+        constexpr Vector2D& operator*=(const Vector2D& v) noexcept { x *= v.x; y *= v.y; return *this; };
         constexpr Vector2D& operator/=(const Vector2D& v) {
             if constexpr (std::is_floating_point_v<T>) {
-                if (std::abs(v._x) < std::numeric_limits<T>::epsilon() || std::abs(v._y) < std::numeric_limits<T>::epsilon())
+                if (std::abs(v.x) < std::numeric_limits<T>::epsilon() || std::abs(v.y) < std::numeric_limits<T>::epsilon())
                     throw std::invalid_argument("Division by zero");
             } else {
-                if (v._x == 0 || v._y == 0)
+                if (v.x == 0 || v.y == 0)
                     throw std::invalid_argument("Division by zero");
             }
-            _x /= v._x; _y /= v._y;
+            x /= v.x; y /= v.y;
             return *this;
         };
 
         constexpr Vector2D& operator*=(T s) {
-            _x *= s;
-            _y *= s;
+            x *= s;
+            y *= s;
             return *this;
         };
         constexpr Vector2D& operator/=(T s) {
             if (s == 0)
                 throw std::invalid_argument("Division by zero");
-            _x /= s;
-            _y /= s;
+            x /= s;
+            y /= s;
             return *this;
         };
         constexpr Vector2D& operator+=(T s) {
-            _x += s;
-            _y += s;
+            x += s;
+            y += s;
             return *this;
         };
         constexpr Vector2D& operator-=(T s) {
-            _x -= s;
-            _y -= s;
+            x -= s;
+            y -= s;
             return *this;
         };
 
-        constexpr T dot(const Vector2D& v) const { return _x * v._x + _y * v._y; };
+        constexpr T dot(const Vector2D& v) const { return x * v.x + y * v.y; };
 
-        constexpr auto length_sqrt() const noexcept { return (_x * _x + _y * _y); }
-        constexpr auto length() const {return std::sqrt(_x *_x + _y * _y);};
+        constexpr auto length_sqrt() const noexcept { return (x * x + y * y); }
+        constexpr auto length() const {return std::sqrt(x *x + y * y);};
         constexpr Vector2D& normalize() {
             auto len = length();
             if (len > std::numeric_limits<T>::epsilon())
@@ -89,15 +89,15 @@ namespace RST::Maths {
 
         template<typename U>
         constexpr Vector2D<U> to() const noexcept {
-            return Vector2D<U>(static_cast<U>(_x), static_cast<U>(_y));
+            return Vector2D<U>(static_cast<U>(x), static_cast<U>(y));
         }
 
         constexpr Vector2D min(const Vector2D& v) const noexcept {
-            return Vector2D(std::min(_x, v._x), std::min(_y, v._y));
+            return Vector2D(std::min(x, v.x), std::min(y, v.y));
         }
 
         constexpr Vector2D max(const Vector2D& v) const noexcept {
-            return Vector2D(std::max(_x, v._x), std::max(_y, v._y));
+            return Vector2D(std::max(x, v.x), std::max(y, v.y));
         }
     };
     
@@ -137,86 +137,86 @@ namespace RST::Maths {
 
     template<typename T>
     struct Vector3D {
-        T _x{}, _y{}, _z{};
+        T x{}, y{}, z{};
 
         constexpr Vector3D() noexcept = default;
-        constexpr Vector3D(T x, T y, T z) noexcept : _x(x), _y(y), _z(z) {}
+        constexpr Vector3D(T x, T y, T z) noexcept : x(x), y(y), z(z) {}
 
-        constexpr void set(const T& x, const T& y, const T& z) {_x = x; _y = y; _z = z;};
-        constexpr T getX() const noexcept {return _x;};
-        constexpr T getY() const noexcept {return _y;};
-        constexpr T getZ() const noexcept {return _z;};
+        constexpr void set(const T& x, const T& y, const T& z) {x = x; y = y; z = z;};
+        constexpr T getX() const noexcept {return x;};
+        constexpr T getY() const noexcept {return y;};
+        constexpr T getZ() const noexcept {return z;};
         constexpr T operator[](const std::size_t n) const {
             switch (n) {
-                case 0: return _x;
-                case 1: return _y;
-                case 2: return _z;
+                case 0: return x;
+                case 1: return y;
+                case 2: return z;
                 default: throw std::out_of_range("Array index out of bounds");
             }
         };
-        constexpr T* data() noexcept { return &_x; };
-        constexpr const T* data() const noexcept { return &_x; };
+        constexpr T* data() noexcept { return &x; };
+        constexpr const T* data() const noexcept { return &x; };
 
         constexpr Vector3D operator+() const {
             return *this;
         }
 
         constexpr Vector3D operator-() const noexcept {
-            return Vector3D(-_x, -_y, -_z);
+            return Vector3D(-x, -y, -z);
         };
 
-        constexpr Vector3D& operator+=(const Vector3D& v) noexcept { _x += v._x; _y += v._y; _z += v._z; return *this; };
-        constexpr Vector3D& operator-=(const Vector3D& v) noexcept { _x -= v._x; _y -= v._y; _z -= v._z; return *this; };
-        constexpr Vector3D& operator*=(const Vector3D& v) noexcept { _x *= v._x; _y *= v._y; _z *= v._z; return *this; };
+        constexpr Vector3D& operator+=(const Vector3D& v) noexcept { x += v.x; y += v.y; z += v.z; return *this; };
+        constexpr Vector3D& operator-=(const Vector3D& v) noexcept { x -= v.x; y -= v.y; z -= v.z; return *this; };
+        constexpr Vector3D& operator*=(const Vector3D& v) noexcept { x *= v.x; y *= v.y; z *= v.z; return *this; };
         constexpr Vector3D& operator/=(const Vector3D& v) {
             if constexpr (std::is_floating_point_v<T>) {
-                if (std::abs(v._x) < std::numeric_limits<T>::epsilon() || std::abs(v._y) < std::numeric_limits<T>::epsilon() || std::abs(v._z) < std::numeric_limits<T>::epsilon())
+                if (std::abs(v.x) < std::numeric_limits<T>::epsilon() || std::abs(v.y) < std::numeric_limits<T>::epsilon() || std::abs(v.z) < std::numeric_limits<T>::epsilon())
                     throw std::invalid_argument("Division by zero");
             } else {
-                if (v._x == 0 || v._y == 0 || v._z == 0)
+                if (v.x == 0 || v.y == 0 || v.z == 0)
                     throw std::invalid_argument("Division by zero");
             }
-            _x /= v._x; _y /= v._y; _z /= v._z;
+            x /= v.x; y /= v.y; z /= v.z;
             return *this;
         };
 
         constexpr Vector3D& operator*=(T s) noexcept {
-            _x *= s;
-            _y *= s;
-            _z *= s;
+            x *= s;
+            y *= s;
+            z *= s;
             return *this;
         };
         constexpr Vector3D& operator/=(T s) { 
             if (s == 0)
                 throw std::invalid_argument("Division by zero");
-            _x /= s;
-            _y /= s;
-            _z /= s;
+            x /= s;
+            y /= s;
+            z /= s;
             return *this;
         };
         constexpr Vector3D& operator+=(T s) noexcept {
-            _x += s;
-            _y += s;
-            _z += s;
+            x += s;
+            y += s;
+            z += s;
             return *this;
         };
         constexpr Vector3D& operator-=(T s) noexcept {
-            _x -= s;
-            _y -= s;
-            _z -= s;
+            x -= s;
+            y -= s;
+            z -= s;
             return *this; 
         };
 
-        constexpr T dot(const Vector3D& v) const noexcept { return _x * v._x + _y * v._y + _z * v._z; };
+        constexpr T dot(const Vector3D& v) const noexcept { return x * v.x + y * v.y + z * v.z; };
         constexpr Vector3D cross(const Vector3D& v) const noexcept {
             return Vector3D(
-                _y * v._z - _z * v._y,
-                _z * v._x - _x * v._z,
-                _x * v._y - _y * v._x
+                y * v.z - z * v.y,
+                z * v.x - x * v.z,
+                x * v.y - y * v.x
             );
         };
 
-        constexpr auto length_sqrt() const noexcept { return (_x * _x + _y * _y + _z * _z); }
+        constexpr auto length_sqrt() const noexcept { return (x * x + y * y + z * z); }
         inline auto length() const noexcept { return std::sqrt(length_sqrt()); }
         inline Vector3D& normalize() {
             auto len = length();
@@ -228,15 +228,15 @@ namespace RST::Maths {
 
         template<typename U>
         constexpr Vector3D<U> to() const noexcept {
-            return Vector3D<U>(static_cast<U>(_x), static_cast<U>(_y), static_cast<U>(_z));
+            return Vector3D<U>(static_cast<U>(x), static_cast<U>(y), static_cast<U>(z));
         }
 
         constexpr Vector3D min(const Vector3D& v) const noexcept {
-            return Vector3D(std::min(_x, v._x), std::min(_y, v._y), std::min(_z, v._z));
+            return Vector3D(std::min(x, v.x), std::min(y, v.y), std::min(z, v.z));
         }
 
         constexpr Vector3D max(const Vector3D& v) const noexcept {
-            return Vector3D(std::max(_x, v._x), std::max(_y, v._y), std::max(_z, v._z));
+            return Vector3D(std::max(x, v.x), std::max(y, v.y), std::max(z, v.z));
         }
     };
 
