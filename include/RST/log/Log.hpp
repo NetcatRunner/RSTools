@@ -28,9 +28,9 @@ namespace RST::Log {
 
 #define RST_LOG_L(logger, lvl, ...)                                            \
     do {                                                                       \
-        ::RST::Log::Logger& target = ::RST::Log::detail::deref(logger);        \
-        if (target.shouldLog(lvl)) {                                           \
-            target.log((lvl), RST_SOURCE_LOCATION, __VA_ARGS__);               \
+        ::RST::Log::Logger& RSTLoggerTarget_ = ::RST::Log::detail::deref(logger);        \
+        if (RSTLoggerTarget_.shouldLog(lvl)) {                                           \
+            RSTLoggerTarget_.log((lvl), RST_SOURCE_LOCATION, __VA_ARGS__);               \
         }                                                                      \
     } while (false)
 
