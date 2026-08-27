@@ -1,9 +1,7 @@
 #pragma once
 
-#include <iostream>
+#include <iosfwd>
 #include <vector>
-#include <sstream>
-#include <chrono>
 #include <memory>
 
 #include "LogLevel.hpp"

@@ -2,6 +2,7 @@
 
 #include <iostream>
 #include <cstdint>
+#include <string_view>
 
 namespace RST::Log {
 
