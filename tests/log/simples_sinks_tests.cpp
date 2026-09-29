@@ -68,3 +68,24 @@ TEST_CASE(test_console_sink_no_crash) {
     CHECK(!oss.str().empty());
     CHECK(oss.str().find("test output") != std::string::npos);
 }
+
+// Every console line is flushed at once: redirected to a pipe or an IDE, the output would
+// otherwise only show when the program ends.
+TEST_CASE(test_console_sink_flushes_every_line) {
+    class CountingBuffer : public std::stringbuf {
+    public:
+        int syncs = 0;
+    protected:
+        int sync() override { ++syncs; return std::stringbuf::sync(); }
+    };
+
+    CountingBuffer buffer;
+    std::ostream stream(&buffer);
+    RST::Log::ConsoleSink sink(stream);
+    sink.setColorEnabled(false);
+    sink.write(RST::Log::LogMessage(RST::Log::LogLevel::Info, "con", "first"));
+    sink.write(RST::Log::LogMessage(RST::Log::LogLevel::Info, "con", "second"));
+
+    CHECK(buffer.syncs == 2);
+    CHECK(buffer.str().find("second") != std::string::npos);
+}

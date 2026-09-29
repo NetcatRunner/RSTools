@@ -1,33 +1,49 @@
 #pragma once
 
+#include "RST/log/LogLevel.hpp"
+#include "RST/log/SourceLocation.hpp"
+
 #include <chrono>
+#include <cstddef>
+#include <cstdint>
 #include <string>
-#include <optional>
-#include "LogLevel.hpp"
+#include <string_view>
 
 namespace RST::Log {
 
-    struct SourceLocation {
-        const char* file = nullptr;
-        const char* func = nullptr;
-        int         line = 0;
-
-        constexpr bool valid() const noexcept { return file != nullptr; }
-    };
-
-    #define RST_SOURCE_LOCATION \
-        RST::Log::SourceLocation { __FILE__, __func__, __LINE__ }
-
     struct LogMessage {
-        std::chrono::system_clock::time_point time;
-        LogLevel                              level    = LogLevel::Info;
-        std::string                           category;
-        std::string                           message;
-        std::optional<SourceLocation>         source;
+        std::chrono::system_clock::time_point time{};
+        std::string_view category;
+        std::string_view message;
+        SourceLocation source{};
+        std::uint64_t threadId = 0;
+        LogLevel level = LogLevel::Info;
 
         LogMessage() = default;
-
-        LogMessage(LogLevel lvl, std::string cat, std::string msg, std::optional<SourceLocation> src = std::nullopt)
-            : time(std::chrono::system_clock::now()), level(lvl), category(std::move(cat)), message(std::move(msg)), source(src) {}
+        LogMessage(LogLevel level, std::string_view category, std::string_view message, SourceLocation source = {}) noexcept;
     };
+
+    class LogMessageBuffer {
+    public:
+        explicit LogMessageBuffer(const LogMessage& message);
+
+        LogMessageBuffer(const LogMessageBuffer& other);
+        LogMessageBuffer(LogMessageBuffer&& other) noexcept;
+        LogMessageBuffer& operator=(const LogMessageBuffer& other);
+        LogMessageBuffer& operator=(LogMessageBuffer&& other) noexcept;
+        ~LogMessageBuffer() = default;
+
+        [[nodiscard]] const LogMessage& get() const noexcept { return _message; }
+        [[nodiscard]] const LogMessage* operator->() const noexcept { return &_message; }
+
+    private:
+        void rebind() noexcept;
+
+        std::string _storage;
+        std::size_t _messageOffset = 0;
+        std::size_t _fileOffset = 0;
+        std::size_t _funcOffset = 0;
+        LogMessage _message;
+    };
+
 }

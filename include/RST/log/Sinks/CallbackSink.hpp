@@ -1,27 +1,33 @@
 #pragma once
-#include "ASink.hpp"
+
+#include "RST/log/Sinks/ASink.hpp"
+
 #include <functional>
+#include <string_view>
 
 namespace RST::Log {
 
-class CallbackSink : public ASink {
-public:
-    using Callback = std::function<void(const LogMessage&)>;
+    class CallbackSink : public ASink {
+    public:
+        using MessageCallback = std::function<void(const LogMessage&)>;
+        using LineCallback = std::function<void(LogLevel, std::string_view)>;
 
-    CallbackSink(Callback cb): _callback(std::move(cb)){}
+        CallbackSink() = default;
+        explicit CallbackSink(MessageCallback callback);
+        explicit CallbackSink(LineCallback callback);
 
-    void setCallback(Callback cb) {
-        _callback = std::move(cb);
-    }
+        void setCallback(MessageCallback callback);
+        void setCallback(LineCallback callback);
+        void clearCallback();
 
-protected:
-    void log(const LogMessage& msg) override {
-        if (_callback)
-            _callback(msg);
-    }
+        [[nodiscard]] bool hasCallback();
 
-private:
-    Callback _callback = nullptr;
-};
+    protected:
+        void log(const LogMessage& message) override;
+
+    private:
+        MessageCallback _messageCallback;
+        LineCallback _lineCallback;
+    };
 
 }

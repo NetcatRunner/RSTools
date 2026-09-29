@@ -1,51 +1,78 @@
 #pragma once
 
 #include "RST/log/LogLevel.hpp"
-#include "RST/log/LogMessage.hpp"
 #include "RST/log/Logger.hpp"
-#include "RST/log/LogRegistry.hpp"
-#include "RST/log/ScopedTimer.hpp"
+#include "RST/log/SourceLocation.hpp"
 
-#include "RST/log/Format/Formatter.hpp"
+namespace RST::Log::detail {
 
-#include "RST/log/Sinks/ISink.hpp"
-#include "RST/log/Sinks/NullSink.hpp"
-#include "RST/log/Sinks/OStreamSink.hpp"
-#include "RST/log/Sinks/CallbackSink.hpp"
-#include "RST/log/Sinks/ConsoleSink.hpp"
-#include "RST/log/Sinks/FileSink.hpp"
-#include "RST/log/Sinks/RotatingFileSink.hpp"
+    [[nodiscard]] inline Logger& deref(Logger& logger) noexcept { return logger; }
+    [[nodiscard]] inline Logger& deref(Logger* logger) noexcept { return *logger; }
 
-namespace RST::Log {
+    template <typename Pointer>
+    [[nodiscard]] Logger& deref(const Pointer& pointer) noexcept { return *pointer; }
 
-    namespace detail {
-        [[nodiscard]] inline Logger& deref(Logger& logger) noexcept { return logger; }
-        [[nodiscard]] inline Logger& deref(Logger* logger) noexcept { return *logger; }
-
-        template <typename Ptr> [[nodiscard]] Logger& deref(const Ptr& pointer) { return *pointer; }
-    }
 }
 
-#define RST_LOG_L(logger, lvl, ...)                                            \
-    do {                                                                       \
-        ::RST::Log::Logger& RSTLoggerTarget_ = ::RST::Log::detail::deref(logger);        \
-        if (RSTLoggerTarget_.shouldLog(lvl)) {                                           \
-            RSTLoggerTarget_.log((lvl), RST_SOURCE_LOCATION, __VA_ARGS__);               \
-        }                                                                      \
+#ifndef RST_LOG_ACTIVE_LEVEL
+#  define RST_LOG_ACTIVE_LEVEL 0
+#endif
+
+#define RST_LOG_L(logger, level, ...)                                                           \
+    do {                                                                                        \
+        ::RST::Log::Logger& rstLogTarget_ = ::RST::Log::detail::deref(logger);                  \
+        if (rstLogTarget_.shouldLog(level)) {                                                   \
+            rstLogTarget_.log((level), RST_SOURCE_LOCATION, __VA_ARGS__);                       \
+        }                                                                                       \
     } while (false)
 
-#define LOG_TRACE_L(logger, ...)  RST_LOG_L(logger, RST::Log::LogLevel::Trace, __VA_ARGS__)
-#define LOG_DEBUG_L(logger, ...)  RST_LOG_L(logger, RST::Log::LogLevel::Debug, __VA_ARGS__)
-#define LOG_INFO_L(logger, ...)   RST_LOG_L(logger, RST::Log::LogLevel::Info,  __VA_ARGS__)
-#define LOG_WARN_L(logger, ...)   RST_LOG_L(logger, RST::Log::LogLevel::Warn,  __VA_ARGS__)
-#define LOG_ERROR_L(logger, ...)  RST_LOG_L(logger, RST::Log::LogLevel::Error, __VA_ARGS__)
-#define LOG_FATAL_L(logger, ...)  RST_LOG_L(logger, RST::Log::LogLevel::Fatal, __VA_ARGS__)
+#define RST_LOG_DISCARDED_L(logger, ...)                                                        \
+    do {                                                                                        \
+        if constexpr (false) {                                                                  \
+            RST_LOG_L(logger, ::RST::Log::LogLevel::Trace, __VA_ARGS__);                        \
+        }                                                                                       \
+    } while (false)
 
-#define RST_LOG(lvl, ...) RST_LOG_L(::RST::Log::Registry::defaultLogger(), (lvl), __VA_ARGS__)
+// ── Macros on a given logger ─────────────────────────────────────────────────
 
-#define LOG_TRACE(...)  RST_LOG(RST::Log::LogLevel::Trace, __VA_ARGS__)
-#define LOG_DEBUG(...)  RST_LOG(RST::Log::LogLevel::Debug, __VA_ARGS__)
-#define LOG_INFO(...)   RST_LOG(RST::Log::LogLevel::Info,  __VA_ARGS__)
-#define LOG_WARN(...)   RST_LOG(RST::Log::LogLevel::Warn,  __VA_ARGS__)
-#define LOG_ERROR(...)  RST_LOG(RST::Log::LogLevel::Error, __VA_ARGS__)
-#define LOG_FATAL(...)  RST_LOG(RST::Log::LogLevel::Fatal, __VA_ARGS__)
+#if RST_LOG_ACTIVE_LEVEL <= 0
+#  define RST_LOGGER_TRACE(logger, ...) RST_LOG_L(logger, ::RST::Log::LogLevel::Trace, __VA_ARGS__)
+#else
+#  define RST_LOGGER_TRACE(logger, ...) RST_LOG_DISCARDED_L(logger, __VA_ARGS__)
+#endif
+#if RST_LOG_ACTIVE_LEVEL <= 1
+#  define RST_LOGGER_DEBUG(logger, ...) RST_LOG_L(logger, ::RST::Log::LogLevel::Debug, __VA_ARGS__)
+#else
+#  define RST_LOGGER_DEBUG(logger, ...) RST_LOG_DISCARDED_L(logger, __VA_ARGS__)
+#endif
+#if RST_LOG_ACTIVE_LEVEL <= 2
+#  define RST_LOGGER_INFO(logger, ...) RST_LOG_L(logger, ::RST::Log::LogLevel::Info, __VA_ARGS__)
+#else
+#  define RST_LOGGER_INFO(logger, ...) RST_LOG_DISCARDED_L(logger, __VA_ARGS__)
+#endif
+#if RST_LOG_ACTIVE_LEVEL <= 3
+#  define RST_LOGGER_WARN(logger, ...) RST_LOG_L(logger, ::RST::Log::LogLevel::Warn, __VA_ARGS__)
+#else
+#  define RST_LOGGER_WARN(logger, ...) RST_LOG_DISCARDED_L(logger, __VA_ARGS__)
+#endif
+#if RST_LOG_ACTIVE_LEVEL <= 4
+#  define RST_LOGGER_ERROR(logger, ...) RST_LOG_L(logger, ::RST::Log::LogLevel::Error, __VA_ARGS__)
+#else
+#  define RST_LOGGER_ERROR(logger, ...) RST_LOG_DISCARDED_L(logger, __VA_ARGS__)
+#endif
+#if RST_LOG_ACTIVE_LEVEL <= 5
+#  define RST_LOGGER_FATAL(logger, ...) RST_LOG_L(logger, ::RST::Log::LogLevel::Fatal, __VA_ARGS__)
+#else
+#  define RST_LOGGER_FATAL(logger, ...) RST_LOG_DISCARDED_L(logger, __VA_ARGS__)
+#endif
+
+// The unprefixed names of RSTools 1.x, for code not yet migrated. Off by default: LOG_INFO
+// and LOG_DEBUG collide with <syslog.h>.
+#if defined(RST_LOG_LEGACY_MACROS)
+#  define LOG_TRACE_L(logger, ...) RST_LOGGER_TRACE(logger, __VA_ARGS__)
+#  define LOG_DEBUG_L(logger, ...) RST_LOGGER_DEBUG(logger, __VA_ARGS__)
+#  define LOG_INFO_L(logger, ...)  RST_LOGGER_INFO(logger, __VA_ARGS__)
+#  define LOG_WARN_L(logger, ...)  RST_LOGGER_WARN(logger, __VA_ARGS__)
+#  define LOG_ERROR_L(logger, ...) RST_LOGGER_ERROR(logger, __VA_ARGS__)
+#  define LOG_FATAL_L(logger, ...) RST_LOGGER_FATAL(logger, __VA_ARGS__)
+#endif

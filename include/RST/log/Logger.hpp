@@ -1,7 +1,11 @@
 #pragma once
 
-#include <iosfwd>
-#include <vector>
+#include "RST/log/LogLevel.hpp"
+#include "RST/log/SourceLocation.hpp"
+
+#include <atomic>
+#include <cstddef>
+#include <format>
 #include <memory>
 #include <string>
 #include <string_view>
