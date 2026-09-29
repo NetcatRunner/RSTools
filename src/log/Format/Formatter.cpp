@@ -1,145 +1,175 @@
 #include "RST/log/Format/Formatter.hpp"
-#include "RST/log/LogLevel.hpp"
 
+#include "RST/log/LogMessage.hpp"
+
+#include "log/detail/Platform.hpp"
+
+#include <array>
+#include <charconv>
 #include <chrono>
-#include <iomanip>
-#include <sstream>
+#include <cstddef>
 #include <ctime>
-#include <cstdlib>      // getpid (POSIX) / _getpid (Windows)
-
-#ifdef _WIN32
-  #include <process.h>
-  #define RST_GETPID() _getpid()
-#else
-  #include <unistd.h>
-  #define RST_GETPID() getpid()
-#endif
+#include <limits>
 
 namespace RST::Log {
 
-void Formatter::pad(std::string& dest, int n, size_t width) {
-    std::string num_str = std::to_string(n);
+    namespace {
 
-    if (num_str.length() < width) {
-        dest.append(width - num_str.length(), '0'); 
-    }
-    
-    dest += num_str;
-}
-
-const std::unordered_map<Formatter::Token::Type, std::function<void(const LogMessage& msg, const std::tm& t, int ms, std::string& dest)>> Formatter::g_formatters = {
-    {Token::Type::Year, [](const LogMessage&, const std::tm& t, int, std::string& dest) { Formatter::pad(dest, t.tm_year + 1900, 4); }},
-    {Token::Type::Month, [](const LogMessage&, const std::tm& t, int, std::string& dest) { Formatter::pad(dest, t.tm_mon + 1, 2); }},
-    {Token::Type::Day, [](const LogMessage&, const std::tm& t, int, std::string& dest) { Formatter::pad(dest, t.tm_mday, 2); }},
-    {Token::Type::Hour, [](const LogMessage&, const std::tm& t, int, std::string& dest) { Formatter::pad(dest, t.tm_hour, 2); }},
-    {Token::Type::Minute, [](const LogMessage&, const std::tm& t, int, std::string& dest) { Formatter::pad(dest, t.tm_min, 2); }},
-    {Token::Type::Second, [](const LogMessage&, const std::tm& t, int, std::string& dest) { Formatter::pad(dest, t.tm_sec, 2); }},
-    {Token::Type::Millisecond, [](const LogMessage&, const std::tm&, int ms, std::string& dest) { Formatter::pad(dest, ms, 3); }},
-    {Token::Type::LevelFull, [](const LogMessage& msg, const std::tm&, int, std::string& dest) { dest += to_string(msg.level); }},
-    {Token::Type::LevelShort, [](const LogMessage& msg, const std::tm&, int, std::string& dest) { dest += to_short_string(msg.level); }},
-    {Token::Type::LoggerName, [](const LogMessage& msg, const std::tm&, int, std::string& dest) { dest += msg.category; }},
-    {Token::Type::Message, [](const LogMessage& msg, const std::tm&, int, std::string& dest) { dest += msg.message; }},
-    {Token::Type::SourceFile, [](const LogMessage& msg, const std::tm&, int, std::string& dest) {
-        if (!msg.source.has_value() || !msg.source->valid())
-            return;
-        if (!msg.source->file)
-            return;
-        std::string_view sv(msg.source->file);
-        auto pos = sv.find_last_of("/\\");
-        dest += (pos == std::string_view::npos) ? sv : sv.substr(pos + 1);
-    }},
-    {Token::Type::SourceFunc, [](const LogMessage& msg, const std::tm&, int, std::string& dest) {
-        if (msg.source.has_value() && msg.source->valid())
-            dest += msg.source->func;
-    }},
-    {Token::Type::SourceLine, [](const LogMessage& msg, const std::tm&, int, std::string& dest) {
-        if (msg.source.has_value() && msg.source->valid())
-            dest += std::to_string(msg.source->line);}},
-    {Token::Type::ProcessId, [](const LogMessage&, const std::tm&, int, std::string& dest) { dest += std::to_string(RST_GETPID()); }},
-};
-
-Formatter::Formatter(std::string_view pattern) {
-    compile(pattern);
-}
-
-void Formatter::setPattern(std::string_view pattern) {
-    compile(pattern);
-}
-
-void Formatter::compile(std::string_view pattern) {
-    _pattern = std::string(pattern);
-    _tokens.clear();
-
-    std::string str;
-    for (size_t i = 0; i < pattern.size(); ++i) {
-        if (pattern[i] != '%' || i + 1 >= pattern.size()) {
-            str += pattern[i];
-            continue;
-        }
-
-        if (!str.empty()) {
-            _tokens.push_back({ Token::Type::Literal, std::move(str) });
-            str.clear();
-        }
-
-        const char spec = pattern[++i];
-        Token::Type kind;
-
-        switch (spec) {
-            case 'Y': kind = Token::Type::Year;         break;
-            case 'm': kind = Token::Type::Month;        break;
-            case 'd': kind = Token::Type::Day;          break;
-            case 'H': kind = Token::Type::Hour;         break;
-            case 'M': kind = Token::Type::Minute;       break;
-            case 'S': kind = Token::Type::Second;       break;
-            case 'e': kind = Token::Type::Millisecond;  break;
-            case 'l': kind = Token::Type::LevelFull;    break;
-            case 'L': kind = Token::Type::LevelShort;   break;
-            case 'n': kind = Token::Type::LoggerName;   break;
-            case 'v': kind = Token::Type::Message;      break;
-            case 'f': kind = Token::Type::SourceFile;   break;
-            case 'F': kind = Token::Type::SourceFunc;   break;
-            case '#': kind = Token::Type::SourceLine;   break;
-            case 'P': kind = Token::Type::ProcessId;    break;
-            case '%': str += '%'; continue;
-            default:  str += '%'; str += spec; continue;
-        }
-        _tokens.push_back({ kind, {} });
-    }
-
-    if (!str.empty())
-        _tokens.push_back({ Token::Type::Literal, std::move(str) });
-}
-
-void Formatter::format(const LogMessage& msg, std::string& dest) const {
-    const auto tt = std::chrono::system_clock::to_time_t(msg.time);
-    const auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(msg.time.time_since_epoch()) % 1000;
-    std::tm tm_buf;
-#ifdef _WIN32
-    localtime_s(&tm_buf, &tt);
-#else
-    localtime_r(&tt, &tm_buf);
-#endif
-    const std::tm& t = tm_buf;
-
-    for (const auto& tok : _tokens) {
-        if (tok.type == Token::Type::Literal) {
-            if (tok.literal.has_value()) {
-                dest += tok.literal.value();
+        void appendNumber(std::string& dest, std::uint64_t value, std::size_t width = 0)
+        {
+            std::array<char, 24> digits{};
+            const std::to_chars_result result = std::to_chars(digits.data(), digits.data() + digits.size(), value);
+            const auto length = static_cast<std::size_t>(result.ptr - digits.data());
+            if (length < width) {
+                dest.append(width - length, '0');
             }
-            continue;
+            dest.append(digits.data(), length);
         }
-        auto it = g_formatters.find(tok.type);
-        if (it != g_formatters.end()) {
-            it->second(msg, t, static_cast<int>(ms.count()), dest);
+
+        void appendPadded(std::string& dest, int value, std::size_t width)
+        {
+            appendNumber(dest, static_cast<std::uint64_t>(value < 0 ? 0 : value), width);
+        }
+
+        [[nodiscard]] std::string_view fileName(const char* path) noexcept
+        {
+            const std::string_view full(path);
+            const std::size_t slash = full.find_last_of("/\\");
+            return slash == std::string_view::npos ? full : full.substr(slash + 1);
+        }
+
+        [[nodiscard]] const std::tm& calendarTime(std::time_t seconds) noexcept
+        {
+            struct Cache {
+                std::time_t seconds = std::numeric_limits<std::time_t>::min();
+                std::tm calendar{};
+            };
+            thread_local Cache cache;
+            if (cache.seconds != seconds) {
+                cache.calendar = detail::localTime(seconds);
+                cache.seconds = seconds;
+            }
+            return cache.calendar;
+        }
+
+    }
+
+    Formatter::Formatter(std::string_view pattern)
+    {
+        compile(pattern);
+    }
+
+    void Formatter::setPattern(std::string_view pattern)
+    {
+        compile(pattern);
+    }
+
+    void Formatter::compile(std::string_view pattern)
+    {
+        _pattern = std::string(pattern);
+        _pieces.clear();
+        _needsTime = false;
+
+        std::string literal;
+        const auto flushLiteral = [&] {
+            if (!literal.empty()) {
+                _pieces.push_back({Token::Literal, std::move(literal)});
+                literal.clear();
+            }
+        };
+
+        for (std::size_t i = 0; i < pattern.size(); ++i) {
+            if (pattern[i] != '%' || i + 1 >= pattern.size()) {
+                literal += pattern[i];
+                continue;
+            }
+
+            const char spec = pattern[++i];
+            Token token = Token::Literal;
+            switch (spec) {
+                case 'Y': token = Token::Year;        break;
+                case 'm': token = Token::Month;       break;
+                case 'd': token = Token::Day;         break;
+                case 'H': token = Token::Hour;        break;
+                case 'M': token = Token::Minute;      break;
+                case 'S': token = Token::Second;      break;
+                case 'e': token = Token::Millisecond; break;
+                case 'l': token = Token::LevelFull;   break;
+                case 'L': token = Token::LevelShort;  break;
+                case 'n': token = Token::Category;    break;
+                case 'v': token = Token::Message;     break;
+                case 'f': token = Token::SourceFile;  break;
+                case 'F': token = Token::SourceFunc;  break;
+                case '#': token = Token::SourceLine;  break;
+                case 't': token = Token::ThreadId;    break;
+                case 'P': token = Token::ProcessId;   break;
+                case '%':
+                    literal += '%';
+                    continue;
+                default:
+                    literal += '%';
+                    literal += spec;
+                    continue;
+            }
+
+            flushLiteral();
+            _pieces.push_back({token, {}});
+            _needsTime = _needsTime || (token >= Token::Year && token <= Token::Millisecond);
+        }
+        flushLiteral();
+    }
+
+    void Formatter::format(const LogMessage& message, std::string& dest) const
+    {
+        const std::tm* calendar = nullptr;
+        std::uint64_t milliseconds = 0;
+        if (_needsTime) {
+            const auto sinceEpoch = message.time.time_since_epoch();
+            const auto seconds = std::chrono::duration_cast<std::chrono::seconds>(sinceEpoch);
+            calendar = &calendarTime(static_cast<std::time_t>(seconds.count()));
+            milliseconds = static_cast<std::uint64_t>(std::chrono::duration_cast<std::chrono::milliseconds>(sinceEpoch - seconds).count());
+        }
+
+        for (const Piece& piece : _pieces) {
+            switch (piece.token) {
+                case Token::Literal:     dest += piece.literal; break;
+                case Token::Year:        appendPadded(dest, calendar->tm_year + 1900, 4); break;
+                case Token::Month:       appendPadded(dest, calendar->tm_mon + 1, 2); break;
+                case Token::Day:         appendPadded(dest, calendar->tm_mday, 2); break;
+                case Token::Hour:        appendPadded(dest, calendar->tm_hour, 2); break;
+                case Token::Minute:      appendPadded(dest, calendar->tm_min, 2); break;
+                case Token::Second:      appendPadded(dest, calendar->tm_sec, 2); break;
+                case Token::Millisecond: appendNumber(dest, milliseconds, 3); break;
+                case Token::LevelFull:   dest += to_string(message.level); break;
+                case Token::LevelShort:  dest += to_short_string(message.level); break;
+                case Token::Category:    dest += message.category; break;
+                case Token::Message:     dest += message.message; break;
+                case Token::SourceFile:
+                    if (message.source.valid()) {
+                        dest += fileName(message.source.file);
+                    }
+                    break;
+                case Token::SourceFunc:
+                    if (message.source.valid() && message.source.func != nullptr) {
+                        dest += message.source.func;
+                    }
+                    break;
+                case Token::SourceLine:
+                    if (message.source.valid()) {
+                        appendPadded(dest, message.source.line, 0);
+                    }
+                    break;
+                case Token::ThreadId:    appendNumber(dest, message.threadId); break;
+                case Token::ProcessId:   appendNumber(dest, detail::currentProcessId()); break;
+            }
         }
     }
-}
 
-std::string Formatter::format(const LogMessage& msg) const {
-    std::string out;
-    format(msg, out);
-    return out;
-}
+    std::string Formatter::format(const LogMessage& message) const
+    {
+        std::string out;
+        format(message, out);
+        return out;
+    }
 
-} // namespace RST::Log
+}

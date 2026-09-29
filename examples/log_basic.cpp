@@ -13,9 +13,9 @@ int main() {
     log->error("Fichier introuvable : {}", "config.json");
 
     // ── 3. Macros  ─────────────
-    LOG_INFO("Macro LOG_INFO — fichier et ligne capturés automatiquement");
-    LOG_WARN("Attention : valeur inattendue {}", 42);
-    LOG_ERROR("Erreur critique dans le module '{}'", "Renderer");
+    RST_LOG_INFO("Macro RST_LOG_INFO — fichier et ligne capturés automatiquement");
+    RST_LOG_WARN("Attention : valeur inattendue {}", 42);
+    RST_LOG_ERROR("Erreur critique dans le module '{}'", "Renderer");
 
     // ── 4. Loggers  ──────────────────────────────────────────
     auto net = RST::Log::Registry::get("Network");

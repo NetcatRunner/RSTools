@@ -2,10 +2,10 @@
 
 class TestSink : public RST::Log::ASink {
 public:
-    std::vector<RST::Log::LogMessage> messages;
+    std::vector<RST::Log::LogMessageBuffer> messages;
 protected:
     void log(const RST::Log::LogMessage& msg) override {
-        messages.push_back(msg);
+        messages.emplace_back(msg);
     }
 };
 

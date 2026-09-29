@@ -1,37 +1,43 @@
 #pragma once
 
-#include "ISink.hpp"
+#include "RST/log/LogMessage.hpp"
+#include "RST/log/Sinks/ISink.hpp"
+
+#include <atomic>
+#include <memory>
+#include <mutex>
+#include <string>
+#include <string_view>
 
 namespace RST::Log {
 
     class ASink : public ISink {
-    protected:
-        virtual void log(const LogMessage& msg) = 0;
-
-        std::string formatted(const LogMessage& msg) const {
-            std::string out;
-            _formatter->format(msg, out);
-            return out;
-        }
-
-        std::shared_ptr<Formatter> _formatter = std::make_shared<Formatter>();
-        LogLevel _minLevel  = LogLevel::Trace;
     public:
-        virtual ~ASink() = default;
+        ASink();
+        ~ASink() override;
 
-        void write(const LogMessage& msg) override {
-            if (!shouldLog(msg.level))
-                return;
-            log(msg);
-        };
+        void write(const LogMessage& message) final;
+        void flush() final;
 
-        virtual void flush() override {};
+        void setLevel(LogLevel level) noexcept final { _level.store(level, std::memory_order_relaxed); }
+        [[nodiscard]] LogLevel getLevel() const noexcept final { return _level.load(std::memory_order_relaxed); }
+        [[nodiscard]] bool shouldLog(LogLevel level) const noexcept final { return level >= getLevel(); }
 
-        void setLevel(LogLevel level) override { _minLevel = level; };
-        LogLevel getLevel() const override { return _minLevel; };
-        bool shouldLog(LogLevel lvl) const override { return lvl >= _minLevel; };
+        void setFormatter(std::shared_ptr<Formatter> formatter) final;
+        void setPattern(std::string_view pattern) final;
 
-        void setFormatter(std::shared_ptr<Formatter> fmt) override {_formatter = std::move(fmt);};
-        void setPattern(std::string_view pattern) override {setFormatter(std::make_shared<Formatter>(pattern));};
+    protected:
+        virtual void log(const LogMessage& message) = 0;
+        virtual void flushSink() {}
+
+        [[nodiscard]] std::string_view formatted(const LogMessage& message);
+        [[nodiscard]] std::mutex& sinkMutex() noexcept { return _mutex; }
+
+    private:
+        std::mutex _mutex;
+        std::shared_ptr<Formatter> _formatter;
+        std::string _line;
+        std::atomic<LogLevel> _level{LogLevel::Trace};
     };
+
 }

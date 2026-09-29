@@ -1,25 +1,28 @@
 #pragma once
-#include "RST/log/LogMessage.hpp"
-#include "RST/log/Format/Formatter.hpp"
+
+#include "RST/log/LogLevel.hpp"
 
 #include <memory>
+#include <string_view>
 
 namespace RST::Log {
+
+    struct LogMessage;
+    class Formatter;
 
     class ISink {
     public:
         virtual ~ISink() = default;
 
-        virtual void write(const LogMessage& msg) = 0;
-
+        virtual void write(const LogMessage& message) = 0;
         virtual void flush() = 0;
 
-        virtual void setLevel(LogLevel level) = 0;
-        virtual LogLevel getLevel() const = 0;
-        virtual bool shouldLog(LogLevel lvl) const = 0;
+        virtual void setLevel(LogLevel level) noexcept = 0;
+        [[nodiscard]] virtual LogLevel getLevel() const noexcept = 0;
+        [[nodiscard]] virtual bool shouldLog(LogLevel level) const noexcept = 0;
 
-        virtual void setFormatter(std::shared_ptr<Formatter> fmt) = 0;
+        virtual void setFormatter(std::shared_ptr<Formatter> formatter) = 0;
         virtual void setPattern(std::string_view pattern) = 0;
     };
 
-} // namespace RST::Log
+}

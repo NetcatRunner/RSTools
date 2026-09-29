@@ -33,12 +33,13 @@
 
 ## 📖 Table of Contents
 
-  - [About the Project](https://www.google.com/search?q=%23-about-the-project)
-  - [Available Modules](https://www.google.com/search?q=%23-available-modules)
-  - [Getting Started](https://www.google.com/search?q=%23-getting-started)
-  - [Usage Example](https://www.google.com/search?q=%23-usage-example)
-  - [Community & Contributing](https://www.google.com/search?q=%23-community--contributing)
-  - [License](https://www.google.com/search?q=%23-license)
+  - [About the Project](#-about-the-project)
+  - [Available Modules](#-available-modules)
+  - [Getting Started](#-getting-started)
+  - [Usage Example](#-usage-example)
+  - [Logging](#-logging)
+  - [Community & Contributing](#-community--contributing)
+  - [License](#-license)
 
 -----
 
@@ -68,7 +69,7 @@ To integrate RSTools into your C++ project, follow these simple steps using CMak
 
 ### Prerequisites
 
-  * A compiler supporting **C++17** or **C++20** (GCC, Clang, or MSVC).
+  * A compiler supporting **C++20** : GCC 13+, Clang 17+, or MSVC 2019 16.10+.
   * **CMake** (3.15 or higher).
 
 ### Installation via CMake

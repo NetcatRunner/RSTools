@@ -1,7 +1,12 @@
 #pragma once
 
 #include "RST/crypto/Crypto.hpp"
+#include "RST/log/Format/Formatter.hpp"
 #include "RST/log/Log.hpp"
+#include "RST/log/LogMessage.hpp"
+#include "RST/log/LogRegistry.hpp"
+#include "RST/log/ScopedTimer.hpp"
+#include "RST/log/Sinks/Sinks.hpp"
 #include "RST/maths/Maths.hpp"
 #include "RST/parser/Parser.hpp"
 #include "RST/string/String.hpp"

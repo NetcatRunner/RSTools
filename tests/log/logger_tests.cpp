@@ -2,10 +2,10 @@
 
 class TestSink : public RST::Log::ASink {
 public:
-    std::vector<RST::Log::LogMessage> messages;
+    std::vector<RST::Log::LogMessageBuffer> messages;
 protected:
     void log(const RST::Log::LogMessage& msg) override {
-        messages.push_back(msg);
+        messages.emplace_back(msg);
     }
 };
 
@@ -25,8 +25,8 @@ TEST_CASE(test_level_filtering) {
     logger.error("should pass");
 
     CHECK(sink->messages.size() == 2);
-    CHECK(sink->messages[0].level == RST::Log::LogLevel::Warn);
-    CHECK(sink->messages[1].level == RST::Log::LogLevel::Error);
+    CHECK(sink->messages[0]->level == RST::Log::LogLevel::Warn);
+    CHECK(sink->messages[1]->level == RST::Log::LogLevel::Error);
 }
 
 TEST_CASE(test_set_level) {
@@ -49,9 +49,9 @@ TEST_CASE(test_message_content) {
 
     logger.info("Hello {}", "World");
     CHECK(sink->messages.size() == 1);
-    CHECK(sink->messages[0].message == "Hello World");
-    CHECK(sink->messages[0].category == "MsgTest");
-    CHECK(sink->messages[0].level == RST::Log::LogLevel::Info);
+    CHECK(sink->messages[0]->message == "Hello World");
+    CHECK(sink->messages[0]->category == "MsgTest");
+    CHECK(sink->messages[0]->level == RST::Log::LogLevel::Info);
 }
 
 TEST_CASE(test_format_multiple_args) {
@@ -61,9 +61,9 @@ TEST_CASE(test_format_multiple_args) {
 
     logger.debug("val={} str={} num={}", 42, "abc", 3.14f);
     CHECK(!sink->messages.empty());
-    CHECK(sink->messages[0].message.find("{}") == std::string::npos);
-    CHECK(sink->messages[0].message.find("42") != std::string::npos);
-    CHECK(sink->messages[0].message.find("abc") != std::string::npos);
+    CHECK(sink->messages[0]->message.find("{}") == std::string::npos);
+    CHECK(sink->messages[0]->message.find("42") != std::string::npos);
+    CHECK(sink->messages[0]->message.find("abc") != std::string::npos);
 }
 
 TEST_CASE(test_source_location_captured) {
@@ -75,7 +75,7 @@ TEST_CASE(test_source_location_captured) {
     logger.log(RST::Log::LogLevel::Info, src, "with source");
 
     CHECK(sink->messages.size() == 1);
-    CHECK(sink->messages[0].source->line == 99);
+    CHECK(sink->messages[0]->source.line == 99);
 }
 
 TEST_CASE(test_multiple_sinks) {
@@ -115,5 +115,5 @@ TEST_CASE(test_sink_level_filter) {
     logger.error("passes sink filter");
 
     CHECK(sink->messages.size() == 1);
-    CHECK(sink->messages[0].level == RST::Log::LogLevel::Error);
+    CHECK(sink->messages[0]->level == RST::Log::LogLevel::Error);
 }

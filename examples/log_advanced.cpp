@@ -35,7 +35,7 @@ void demo_patterns() {
     logger->debug("Avec thread ID");
 
     console->setPattern("[%l] %v  (%f:%#)");
-    LOG_INFO_L(logger, "Avec source location");
+    RST_LOGGER_INFO(logger, "Avec source location");
 }
 
 void demo_registry() {

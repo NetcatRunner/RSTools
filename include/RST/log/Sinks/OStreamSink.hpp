@@ -1,22 +1,27 @@
 #pragma once
-#include "ASink.hpp"
+
+#include "RST/log/Sinks/ASink.hpp"
+
 #include <ostream>
 
 namespace RST::Log {
 
-class OStreamSink : public ASink {
-public:
-    OStreamSink(std::ostream& stream) : _stream(stream) {}
+    class OStreamSink : public ASink {
+    public:
+        explicit OStreamSink(std::ostream& stream) : _stream(stream) {}
 
-    void flush() override { _stream.flush(); }
+    protected:
+        void log(const LogMessage& message) override
+        {
+            const std::string_view line = formatted(message);
+            _stream.write(line.data(), static_cast<std::streamsize>(line.size()));
+            _stream.put('\n');
+        }
 
-protected:
-    void log(const LogMessage& msg) override {
-        _stream << formatted(msg) << '\n';
-    }
+        void flushSink() override { _stream.flush(); }
 
-private:
-    std::ostream& _stream;
-};
+    private:
+        std::ostream& _stream;
+    };
 
-} // namespace RST::Log
+}

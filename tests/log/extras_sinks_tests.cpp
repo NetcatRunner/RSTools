@@ -41,9 +41,9 @@ TEST_CASE(test_ostream_sink_multiple_messages) {
 }
 
 TEST_CASE(test_callback_sink_called) {
-    std::vector<RST::Log::LogMessage> captured;
+    std::vector<RST::Log::LogMessageBuffer> captured;
     auto sink = std::make_shared<RST::Log::CallbackSink>([&](const RST::Log::LogMessage& msg) {
-        captured.push_back(msg);
+        captured.emplace_back(msg);
     });
 
     RST::Log::Logger logger("CbTest");
@@ -52,9 +52,9 @@ TEST_CASE(test_callback_sink_called) {
     logger.error("error callback");
 
     CHECK(captured.size() == 2);
-    CHECK(captured[0].level == RST::Log::LogLevel::Info);
-    CHECK(captured[1].level == RST::Log::LogLevel::Error);
-    CHECK(captured[0].message == "hello callback");
+    CHECK(captured[0]->level == RST::Log::LogLevel::Info);
+    CHECK(captured[1]->level == RST::Log::LogLevel::Error);
+    CHECK(captured[0]->message == "hello callback");
 }
 
 TEST_CASE(test_callback_sink_level_filter) {
@@ -89,9 +89,9 @@ TEST_CASE(test_callback_sink_replace_callback) {
 }
 
 TEST_CASE(test_scoped_timer_logs_on_exit) {
-    std::vector<RST::Log::LogMessage> captured;
+    std::vector<RST::Log::LogMessageBuffer> captured;
     auto sink = std::make_shared<RST::Log::CallbackSink>([&](const RST::Log::LogMessage& msg) {
-        captured.push_back(msg);
+        captured.emplace_back(msg);
     });
 
     auto logger = std::make_shared<RST::Log::Logger>("TimerTest", RST::Log::LogLevel::Debug);
@@ -102,14 +102,14 @@ TEST_CASE(test_scoped_timer_logs_on_exit) {
     }
 
     CHECK(captured.size() == 1);
-    CHECK(captured[0].message.find("my_operation") != std::string::npos);
-    CHECK(captured[0].message.find("ms") != std::string::npos);
+    CHECK(captured[0]->message.find("my_operation") != std::string::npos);
+    CHECK(captured[0]->message.find("ms") != std::string::npos);
 }
 
 TEST_CASE(test_scoped_timer_warn_on_slow) {
-    std::vector<RST::Log::LogMessage> captured;
+    std::vector<RST::Log::LogMessageBuffer> captured;
     auto sink = std::make_shared<RST::Log::CallbackSink>([&](const RST::Log::LogMessage& msg) {
-        captured.push_back(msg);
+        captured.emplace_back(msg);
     });
 
     auto logger = std::make_shared<RST::Log::Logger>("SlowTimer", RST::Log::LogLevel::Debug);
@@ -119,8 +119,8 @@ TEST_CASE(test_scoped_timer_warn_on_slow) {
     }
 
     CHECK(captured.size() == 1);
-    CHECK(captured[0].level == RST::Log::LogLevel::Warn);
-    CHECK(captured[0].message.find("[SLOW]") != std::string::npos);
+    CHECK(captured[0]->level == RST::Log::LogLevel::Warn);
+    CHECK(captured[0]->message.find("[SLOW]") != std::string::npos);
 }
 
 TEST_CASE(test_scoped_timer_elapsed) {
