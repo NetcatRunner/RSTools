@@ -7,9 +7,14 @@
 
 namespace RST::System {
 
-    // ── CPU ──────────────────────────────────────────────────────────────────
+    /// @name CPU
+    /// @{
+
+    /// Number of logical cores, at least 1.
     [[nodiscard]] std::size_t getCpuCores() noexcept;
+    /// CPU model name, or an empty string if unknown.
     [[nodiscard]] std::string getCpuName();
+    /// Architecture the program was built for: `x86_64`, `x86`, `arm64`, `arm`, `riscv`, `wasm` or `unknown`.
     [[nodiscard]] constexpr std::string_view getArchitecture() noexcept
     {
 #if defined(__x86_64__) || defined(_M_X64)
@@ -28,20 +33,34 @@ namespace RST::System {
         return "unknown";
 #endif
     }
+    /// @}
 
-    // ── Memory ────────────────────────────────────
+    /// @name Memory
+    /// Sizes in bytes, or 0 if unavailable.
+    /// @{
     [[nodiscard]] std::uint64_t getTotalRAM() noexcept;
     [[nodiscard]] std::uint64_t getAvailableRAM() noexcept;
 
+    /// Physical memory used by this process.
     [[nodiscard]] std::uint64_t getProcessMemoryUsage() noexcept;
+    /// Highest physical memory used by this process so far.
     [[nodiscard]] std::uint64_t getPeakProcessMemoryUsage() noexcept;
+    /// @}
 
-    // ── Operating system ─────────────────────────────────────────────────────
+    /// @name Operating system
+    /// @{
+
+    /// Operating system family, such as `Linux` or `Windows 64-bit`.
     [[nodiscard]] std::string getOSName();
 
+    /// Network name of this computer, or an empty string on failure.
     [[nodiscard]] std::string getHostName();
+    /// @}
 
-    // ── Disk ──────────────────
+    /// @name Disk
+    /// Sizes in bytes of the file system holding `path`, or 0 on failure.
+    /// @{
     [[nodiscard]] std::uint64_t getTotalDiskSpace(const std::string& path = "/");
     [[nodiscard]] std::uint64_t getAvailableDiskSpace(const std::string& path = "/");
+    /// @}
 }

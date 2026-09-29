@@ -2,6 +2,9 @@
 
 namespace RST::String {
 
+    /// @name Characters
+    /// ASCII only: unlike `<cctype>`, they ignore the locale and accept any `char`.
+    /// @{
     [[nodiscard]] constexpr bool isSpace(char c) noexcept { return c == ' ' || (c >= '\t' && c <= '\r'); }
     [[nodiscard]] constexpr bool isDigit(char c) noexcept { return c >= '0' && c <= '9'; }
     [[nodiscard]] constexpr bool isUpper(char c) noexcept { return c >= 'A' && c <= 'Z'; }
@@ -12,5 +15,6 @@ namespace RST::String {
 
     [[nodiscard]] constexpr char toLower(char c) noexcept { return isUpper(c) ? static_cast<char>(c + ('a' - 'A')) : c; }
     [[nodiscard]] constexpr char toUpper(char c) noexcept { return isLower(c) ? static_cast<char>(c - ('a' - 'A')) : c; }
+    /// @}
 
 }

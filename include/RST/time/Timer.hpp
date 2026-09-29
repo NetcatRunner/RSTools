@@ -5,6 +5,7 @@
 
 namespace RST::Time {
 
+    /// Stopwatch that can be stopped and resumed, based on a steady clock.
     class Timer {
     public:
         using Clock = std::chrono::steady_clock;
@@ -12,6 +13,7 @@ namespace RST::Time {
 
         Timer() noexcept = default;
 
+        /// Returns a running timer.
         [[nodiscard]] static Timer startNew() noexcept
         {
             Timer timer;
@@ -19,6 +21,7 @@ namespace RST::Time {
             return timer;
         }
 
+        /// Starts from zero.
         void start() noexcept
         {
             _accumulated = Duration::zero();
@@ -26,6 +29,7 @@ namespace RST::Time {
             _isRunning = true;
         }
 
+        /// Pauses, keeping the elapsed time.
         void stop() noexcept
         {
             if (_isRunning) {
@@ -34,6 +38,7 @@ namespace RST::Time {
             }
         }
 
+        /// Continues after stop().
         void resume() noexcept
         {
             if (!_isRunning) {
@@ -42,12 +47,14 @@ namespace RST::Time {
             }
         }
 
+        /// Stops and clears the elapsed time.
         void reset() noexcept
         {
             _accumulated = Duration::zero();
             _isRunning = false;
         }
 
+        /// Returns the elapsed time and starts again from zero.
         Duration restart() noexcept
         {
             const Clock::time_point now = Clock::now();
@@ -60,11 +67,13 @@ namespace RST::Time {
 
         [[nodiscard]] bool isRunning() const noexcept { return _isRunning; }
 
+        /// Total running time.
         [[nodiscard]] Duration elapsed() const noexcept
         {
             return _isRunning ? _accumulated + (Clock::now() - _startTime) : _accumulated;
         }
 
+        /// Elapsed time in seconds; the `Ms`, `Us` and `Ns` variants use milli-, micro- and nanoseconds.
         template <typename T = double>
         [[nodiscard]] T getElapsedSeconds() const noexcept { return getElapsedTime<T, std::ratio<1>>(); }
 

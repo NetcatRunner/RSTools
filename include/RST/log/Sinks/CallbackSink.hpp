@@ -7,6 +7,7 @@
 
 namespace RST::Log {
 
+    /// Calls a function for each message, with the LogMessage or with the level and formatted line.
     class CallbackSink : public ASink {
     public:
         using MessageCallback = std::function<void(const LogMessage&)>;

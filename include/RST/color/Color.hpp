@@ -7,9 +7,10 @@
 #include <string>
 #include <string_view>
 
+/// RGBA colors: hex and HSV conversions, blending, interpolation and named colors.
 namespace RST::Color {
 
-    // Hue in degrees [0, 360), saturation, value and alpha in [0, 1].
+    /// HSV color: hue in degrees [0, 360), saturation, value and alpha in [0, 1].
     struct Hsv {
         float h = 0.f;
         float s = 0.f;
@@ -17,28 +18,33 @@ namespace RST::Color {
         float a = 1.f;
     };
 
-    // 8-bit RGBA
+    /// 8-bit RGBA color, packed in 4 bytes.
     struct Color {
         std::uint8_t r;
         std::uint8_t g;
         std::uint8_t b;
         std::uint8_t a;
 
+        /// Opaque black.
         constexpr Color() noexcept : r(0), g(0), b(0), a(255) {}
         constexpr Color(std::uint8_t red, std::uint8_t green, std::uint8_t blue, std::uint8_t alpha = 255) noexcept : r(red), g(green), b(blue), a(alpha) {}
+        /// From a `0xRRGGBBAA` value.
         constexpr Color(std::uint32_t hex) noexcept : r(static_cast<std::uint8_t>(hex >> 24)), g(static_cast<std::uint8_t>(hex >> 16)), b(static_cast<std::uint8_t>(hex >> 8)), a(static_cast<std::uint8_t>(hex)) {}
 
         // ── Construction ─────────────────────────────────────────────────────
+        /// From a `0xRRGGBB` value and a separate alpha.
         [[nodiscard]] static constexpr Color fromRgb(std::uint32_t rgb, std::uint8_t alpha = 255) noexcept {
             return Color((rgb << 8) | alpha);
         }
 
+        /// From components in [0, 1], clamped.
         [[nodiscard]] static constexpr Color fromFloat(float red, float green, float blue, float alpha = 1.f) noexcept {
             return Color(toByte(red), toByte(green), toByte(blue), toByte(alpha));
         }
 
         [[nodiscard]] static Color fromHsv(const Hsv& hsv) noexcept;
 
+        /// Parses `#RGB`, `#RGBA`, `#RRGGBB` or `#RRGGBBAA`, with or without the `#`.
         [[nodiscard]] static constexpr std::optional<Color> fromHexString(std::string_view text) noexcept {
             if (!text.empty() && text.front() == '#') {
                 text.remove_prefix(1);
@@ -62,26 +68,32 @@ namespace RST::Color {
         }
 
         // ── Conversion ───────────────────────────────────────────────────────
+        /// Packed as `0xRRGGBBAA`.
         [[nodiscard]] constexpr std::uint32_t toHex() const noexcept {
             return (static_cast<std::uint32_t>(r) << 24) | (static_cast<std::uint32_t>(g) << 16) | (static_cast<std::uint32_t>(b) << 8) | a;
         }
+        /// Packed as `0xRRGGBB`, without alpha.
         [[nodiscard]] constexpr std::uint32_t toRgb() const noexcept {
             return toHex() >> 8;
         }
+        /// Components in [0, 1].
         [[nodiscard]] constexpr std::array<float, 4> toFloat() const noexcept {
             return {r / 255.f, g / 255.f, b / 255.f, a / 255.f};
         }
 
         [[nodiscard]] Hsv toHsv() const noexcept;
+        /// Formats as `#RRGGBBAA`, or `#RRGGBB` without alpha.
         [[nodiscard]] std::string toHexString(bool withAlpha = true) const;
 
         // ── Variations ───────────────────────────────────────────────────────
         [[nodiscard]] constexpr Color withAlpha(std::uint8_t alpha) const noexcept { return Color(r, g, b, alpha); }
 
+        /// Inverts red, green and blue, keeping alpha.
         [[nodiscard]] constexpr Color inverted() const noexcept {
             return Color(static_cast<std::uint8_t>(255 - r), static_cast<std::uint8_t>(255 - g), static_cast<std::uint8_t>(255 - b), a);
         }
 
+        /// Gray of the same luminance, keeping alpha.
         [[nodiscard]] constexpr Color grayscale() const noexcept {
             const auto luma = static_cast<std::uint8_t>((54 * r + 183 * g + 19 * b + 128) >> 8);
             return Color(luma, luma, luma, a);
@@ -105,8 +117,11 @@ namespace RST::Color {
 
     static_assert(sizeof(Color) == 4, "Color must stay 4 packed bytes");
 
+    /// Prints the color as `#RRGGBBAA`.
     std::ostream& operator<<(std::ostream& out, const Color& color);
 
+    /// @name Named colors
+    /// @{
     constexpr Color Black {0, 0, 0, 255};
     constexpr Color White {255, 255, 255, 255};
     constexpr Color Gray {128, 128, 128, 255};
@@ -119,7 +134,9 @@ namespace RST::Color {
     constexpr Color Orange {255, 165, 0, 255};
     constexpr Color Purple {128, 0, 128, 255};
     constexpr Color Transparent {0, 0, 0, 0};
+    /// @}
 
+    /// Interpolates every component, alpha included, with `t` clamped to [0, 1].
     [[nodiscard]] constexpr Color lerp(const Color& a, const Color& b, float t) noexcept {
         t = t > 0.f ? (t < 1.f ? t : 1.f) : 0.f;
         const auto mix = [t](std::uint8_t from, std::uint8_t to) {
@@ -129,6 +146,7 @@ namespace RST::Color {
         return Color(mix(a.r, b.r), mix(a.g, b.g), mix(a.b, b.b), mix(a.a, b.a));
     }
 
+    /// Draws `src` over `dst`, taking the alpha of both into account.
     [[nodiscard]] constexpr Color blend(const Color& src, const Color& dst) noexcept {
         if (src.a == 255 || dst.a == 0) {
             return src;

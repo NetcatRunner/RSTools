@@ -6,6 +6,7 @@
 
 namespace RST::Log {
 
+    /// Writes plain lines to a `std::ostream`, which must outlive the sink.
     class OStreamSink : public ASink {
     public:
         explicit OStreamSink(std::ostream& stream) : _stream(stream) {}

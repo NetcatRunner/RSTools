@@ -9,12 +9,18 @@ namespace RST::Log {
 
     struct LogMessage;
 
+    /// Turns a LogMessage into a line of text following a pattern.
+    ///
+    /// Pattern codes: `%Y` `%m` `%d` date, `%H` `%M` `%S` `%e` time with milliseconds, `%l` level, `%L` short
+    /// level, `%n` logger name, `%v` message, `%f` `%F` `%#` source file, function and line, `%t` thread id,
+    /// `%P` process id and `%%` a percent sign.
     class Formatter {
     public:
         static constexpr std::string_view DEFAULT_PATTERN = "[%Y-%m-%d %H:%M:%S.%e] [%l] [%n] %v";
 
         explicit Formatter(std::string_view pattern = DEFAULT_PATTERN);
 
+        /// Appends the formatted message to `dest`.
         void format(const LogMessage& message, std::string& dest) const;
         [[nodiscard]] std::string format(const LogMessage& message) const;
 

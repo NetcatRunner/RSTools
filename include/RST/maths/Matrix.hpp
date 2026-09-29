@@ -12,9 +12,13 @@
 #include <utility>
 
 namespace RST::Maths {
+    /// Fixed-size matrix of `Rows` x `Cols` elements, stored in row-major order.
+    ///
+    /// Transformations apply to column vectors: `translation * rotation` rotates first, then translates.
     template <typename T, size_t Rows, size_t Cols>
     class Matrix {
     public:
+        /// Identity matrix.
         constexpr Matrix() noexcept {
             for (size_t i = 0; i < Rows * Cols; ++i) {
                 m[i] = 0;
@@ -25,10 +29,13 @@ namespace RST::Maths {
             }
         }
 
+        /// Matrix with every element set to `value`.
         constexpr explicit Matrix(T value) noexcept {
             for (size_t i = 0; i < Rows * Cols; ++i) m[i] = value;
         }
 
+        /// Elements in row-major order.
+        /// @throws std::invalid_argument if `list` does not hold `Rows * Cols` elements.
         constexpr Matrix(std::initializer_list<T> list) {
             if (list.size() != Rows * Cols) {
                 throw std::invalid_argument("Invalid initializer list size for Matrix");
@@ -38,14 +45,17 @@ namespace RST::Maths {
                 m[i++] = val;
         }
 
+        /// Element at `index` in row-major order.
         constexpr T& operator[](size_t index) noexcept { return m[index]; }
         constexpr const T& operator[](size_t index) const noexcept { return m[index]; }
+        /// Element at `row` and `col`.
         constexpr T& operator()(size_t row, size_t col) noexcept { return m[row * Cols + col]; }
         constexpr const T& operator()(size_t row, size_t col) const noexcept { return m[row * Cols + col]; }
 
         [[nodiscard]] static constexpr size_t rows() noexcept { return Rows; }
         [[nodiscard]] static constexpr size_t cols() noexcept { return Cols; }
 
+        /// The elements in row-major order.
         [[nodiscard]] constexpr T* data() noexcept { return m; }
         [[nodiscard]] constexpr const T* data() const noexcept { return m; }
 
@@ -110,6 +120,7 @@ namespace RST::Maths {
             return res;
         }
 
+        /// Transforms a point, translation included.
         [[nodiscard]] constexpr Vector3D<T> transformPoint(const Vector3D<T>& p) const {
             static_assert(Rows >= 3 && Cols >= 4, "Matrix must be at least 3x4 to transform a 3D point");
             T res[3];
@@ -120,6 +131,7 @@ namespace RST::Maths {
             return Vector3D<T>{res[0], res[1], res[2]};
         }
 
+        /// Transforms a direction, ignoring the translation.
         [[nodiscard]] constexpr Vector3D<T> transformDirection(const Vector3D<T>& d) const {
             static_assert(Rows >= 3 && Cols >= 3, "Matrix must be at least 3x3 to transform a 3D direction");
             T res[3];
@@ -139,6 +151,7 @@ namespace RST::Maths {
             return res;
         }
 
+        /// Determinant of a square matrix; above 3x3, `T` must be a floating-point type.
         [[nodiscard]] constexpr T determinant() const noexcept {
             static_assert(Rows == Cols, "Only square matrices have a determinant");
             const auto& a = *this;
@@ -176,6 +189,8 @@ namespace RST::Maths {
             }
         }
 
+        /// Inverse of a square matrix.
+        /// @throws std::runtime_error if the matrix is singular.
         [[nodiscard]] constexpr Matrix<T, Rows, Cols> inverse() const {
             static_assert(Rows == Cols, "Only square matrices can be inverted");
             Matrix<T, Rows, Cols> temp = *this; 
@@ -217,6 +232,7 @@ namespace RST::Maths {
             return inv;
         }
 
+        /// Translation matrix, 4x4 or larger.
         [[nodiscard]] static constexpr Matrix<T, Rows, Cols> translation(T x, T y, T z) noexcept {
             static_assert(Rows >= 4 && Cols >= 4, "Matrix must be 4x4 or larger for 3D translation");
             Matrix<T, Rows, Cols> res;
@@ -230,6 +246,7 @@ namespace RST::Maths {
             return translation(v.getX(), v.getY(), v.getZ());
         }
 
+        /// Scaling matrix.
         [[nodiscard]] static constexpr Matrix<T, Rows, Cols> scale(T sx, T sy, T sz) noexcept {
             static_assert(Rows >= 3 && Cols >= 3, "Matrix must be 3x3 or larger for 3D scaling");
             Matrix<T, Rows, Cols> res;
@@ -239,9 +256,11 @@ namespace RST::Maths {
             return res;
         }
 
+        /// Uniform scaling matrix.
         [[nodiscard]] static constexpr Matrix<T, Rows, Cols> scale(T s) noexcept {
             return scale(s, s, s);
         }
+        /// Shearing matrix: `sxy` adds `sxy * y` to x, and so on.
         [[nodiscard]] static constexpr Matrix<T, Rows, Cols> shear(T sxy, T sxz, T syx, T syz, T szx, T szy) noexcept {
             static_assert(Rows >= 3 && Cols >= 3, "Matrix must be 3x3 or larger for 3D shearing");
             Matrix<T, Rows, Cols> res;
@@ -254,6 +273,7 @@ namespace RST::Maths {
             return res;
         }
 
+        /// Rotation of `angleRad` radians around the X axis.
         [[nodiscard]] static Matrix<T, Rows, Cols> rotationX(T angleRad) {
             static_assert(Rows >= 3 && Cols >= 3, "Matrix must be 3x3 or larger for 3D rotation");
             Matrix<T, Rows, Cols> res;
@@ -266,6 +286,7 @@ namespace RST::Maths {
             return res;
         }
 
+        /// Rotation of `angleRad` radians around the Y axis.
         [[nodiscard]] static Matrix<T, Rows, Cols> rotationY(T angleRad) {
            static_assert(Rows >= 3 && Cols >= 3, "Matrix must be 3x3 or larger for 3D rotation");
             Matrix<T, Rows, Cols> res;
@@ -280,6 +301,7 @@ namespace RST::Maths {
             return res;
         }
 
+        /// Rotation of `angleRad` radians around the Z axis.
         [[nodiscard]] static Matrix<T, Rows, Cols> rotationZ(T angleRad) {
             static_assert(Rows >= 3 && Cols >= 3, "Matrix must be 3x3 or larger for 3D rotation");
             Matrix<T, Rows, Cols> res;
@@ -298,6 +320,7 @@ namespace RST::Maths {
             return Matrix<T, Rows, Cols>();
         }
 
+        /// OpenGL-style orthographic projection.
         [[nodiscard]] static Matrix<T, 4, 4> ortho(T left, T right, T bottom, T top, T nearP = T(-1), T farP = T(1)) {
             static_assert(Rows == 4 && Cols == 4, "ortho requires a 4x4 matrix");
             Matrix<T, 4, 4> r(T(0));
@@ -311,6 +334,7 @@ namespace RST::Maths {
             return r;
         }
 
+        /// OpenGL-style perspective projection, with a vertical field of view in degrees.
         [[nodiscard]] static Matrix<T, 4, 4> perspective(T fovYDeg, T aspect, T nearP, T farP) {
             static_assert(Rows == 4 && Cols == 4, "perspective requires a 4x4 matrix");
             const T fovYRad = toRad(fovYDeg);
@@ -324,6 +348,7 @@ namespace RST::Maths {
             return r;
         }
 
+        /// Right-handed view matrix of a camera at `eye` looking at `center`.
         [[nodiscard]] static Matrix<T, 4, 4> lookAt(const Vector3D<T>& eye, const Vector3D<T>& center, const Vector3D<T>& up) {
             static_assert(Rows == 4 && Cols == 4, "lookAt requires a 4x4 matrix");
             Vector3D<T> z = (eye - center).normalized();
@@ -348,8 +373,8 @@ namespace RST::Maths {
     using Matrix3f = Matrix<float, 3, 3>;
     using Matrix4d = Matrix<double, 4, 4>;
     using Matrix3d = Matrix<double, 3, 3>;
-    using Vector4f = Matrix<float, 4, 1>;
-    using Vector3f = Matrix<float, 3, 1>;
+    using Vector4f = Matrix<float, 4, 1>; ///< Column vector, to multiply with a Matrix4f.
+    using Vector3f = Matrix<float, 3, 1>; ///< Column vector, to multiply with a Matrix3f.
 
     template <typename T, size_t Rows, size_t Cols>
     std::ostream& operator<<(std::ostream& os, const Matrix<T, Rows, Cols>& mat) {

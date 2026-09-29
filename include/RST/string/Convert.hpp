@@ -12,6 +12,13 @@
 
 namespace RST::String {
 
+    /// @name Conversions
+    /// @{
+
+    /// Parses `text` as a number, or returns `std::nullopt` if it is not entirely one.
+    ///
+    /// Surrounding whitespace and a leading `+` are allowed. Integers accept any `base` from 2 to 36,
+    /// with an optional `0x` prefix in base 16; floating-point numbers are base 10 only.
     template <typename T>
     [[nodiscard]] std::optional<T> parseNumber(std::string_view text, int base = 10) noexcept
     {
@@ -38,6 +45,7 @@ namespace RST::String {
         return value;
     }
 
+    /// Parses `true`, `yes`, `on`, `1` or `false`, `no`, `off`, `0`, ignoring case.
     [[nodiscard]] constexpr std::optional<bool> parseBool(std::string_view text) noexcept
     {
         text = trimView(text);
@@ -49,4 +57,5 @@ namespace RST::String {
                 return false;
         return std::nullopt;
     }
+    /// @}
 }

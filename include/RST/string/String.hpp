@@ -10,3 +10,8 @@
 #include "RST/string/ToLower.hpp"
 #include "RST/string/ToUpper.hpp"
 #include "RST/string/Trim.hpp"
+
+/// @namespace RST::String
+/// String helpers: case, trimming, splitting, joining, replacing, parsing and hashing.
+///
+/// In-place functions such as trim() come with a `Copy` variant such as trimCopy().

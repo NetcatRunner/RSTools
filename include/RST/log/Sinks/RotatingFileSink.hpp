@@ -9,11 +9,14 @@
 
 namespace RST::Log {
 
+    /// Writes to a file and rotates it when it grows too large.
     class RotatingFileSink : public ASink {
     public:
         static constexpr std::size_t DEFAULT_MAX_SIZE  = 10 * 1024 * 1024;
         static constexpr std::size_t DEFAULT_MAX_FILES = 5;
 
+        /// Starts a new file past `maxSize` bytes, keeping `maxFiles` backups; `<filepath>.1.log` is the newest.
+        /// @throws std::runtime_error if the file cannot be opened.
         explicit RotatingFileSink(std::string_view filepath, std::size_t maxSize = DEFAULT_MAX_SIZE, std::size_t maxFiles = DEFAULT_MAX_FILES);
         ~RotatingFileSink() override;
 

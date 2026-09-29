@@ -3,24 +3,24 @@
 
 int main() {
     // ── 1. Init ────────────────────
-    auto log = RST::Log::Registry::init("MonApp", RST::Log::LogLevel::Debug);
+    auto log = RST::Log::Registry::init("MyApp", RST::Log::LogLevel::Debug);
 
     // ── 2. Logs ───────────────────────────────────────
-    log->trace("Ce message ne s'affiche pas (niveau Debug minimum)");
-    log->debug("Démarrage du moteur — threads={}", 4);
-    log->info("Application démarrée — v{}.{}", 1, 0);
-    log->warn("Mémoire disponible faible : {}MB restant", 128);
-    log->error("Fichier introuvable : {}", "config.json");
+    log->trace("Not shown: the level is Debug");
+    log->debug("Starting the engine, threads={}", 4);
+    log->info("Application started, v{}.{}", 1, 0);
+    log->warn("Low memory: {}MB left", 128);
+    log->error("File not found: {}", "config.json");
 
     // ── 3. Macros  ─────────────
-    RST_LOG_INFO("Macro RST_LOG_INFO — fichier et ligne capturés automatiquement");
-    RST_LOG_WARN("Attention : valeur inattendue {}", 42);
-    RST_LOG_ERROR("Erreur critique dans le module '{}'", "Renderer");
+    RST_LOG_INFO("RST_LOG_INFO records the file and line");
+    RST_LOG_WARN("Unexpected value {}", 42);
+    RST_LOG_ERROR("Critical error in the '{}' module", "Renderer");
 
     // ── 4. Loggers  ──────────────────────────────────────────
     auto net = RST::Log::Registry::get("Network");
-    net->info("Connexion à {}:{}", "192.168.1.1", 8080);
-    net->warn("Timeout après {}ms", 5000);
+    net->info("Connecting to {}:{}", "192.168.1.1", 8080);
+    net->warn("Timeout after {}ms", 5000);
 
     return 0;
 }

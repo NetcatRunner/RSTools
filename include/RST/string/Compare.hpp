@@ -6,6 +6,9 @@
 #include <string_view>
 
 namespace RST::String {
+    /// @name Searching and comparing
+    /// The `IgnoreCase` variants ignore the case of ASCII letters.
+    /// @{
     [[nodiscard]] constexpr bool contains(std::string_view str, std::string_view needle) noexcept { return str.find(needle) != std::string_view::npos; }
     [[nodiscard]] constexpr bool contains(std::string_view str, char c) noexcept { return str.find(c) != std::string_view::npos; }
 
@@ -32,6 +35,7 @@ namespace RST::String {
         return str.size() >= suffix.size() && equalsIgnoreCase(str.substr(str.size() - suffix.size()), suffix);
     }
 
+    /// Position of the first `needle` at or after `from`, or `std::string_view::npos`.
     [[nodiscard]] constexpr std::size_t findIgnoreCase(std::string_view str, std::string_view needle, std::size_t from = 0) noexcept
     {
         if (from > str.size() || needle.size() > str.size() - from) {
@@ -50,6 +54,7 @@ namespace RST::String {
         return findIgnoreCase(str, needle) != std::string_view::npos;
     }
 
+    /// Three-way comparison like `strcmp`: negative, zero or positive.
     [[nodiscard]] constexpr int compareIgnoreCase(std::string_view lhs, std::string_view rhs) noexcept
     {
         const std::size_t common = lhs.size() < rhs.size() ? lhs.size() : rhs.size();
@@ -62,4 +67,5 @@ namespace RST::String {
         }
         return lhs.size() == rhs.size() ? 0 : (lhs.size() < rhs.size() ? -1 : 1);
     }
+    /// @}
 }

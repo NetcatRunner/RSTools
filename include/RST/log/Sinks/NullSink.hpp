@@ -4,6 +4,7 @@
 
 namespace RST::Log {
 
+    /// Discards every message.
     class NullSink : public ASink {
     protected:
         void log(const LogMessage&) override {}

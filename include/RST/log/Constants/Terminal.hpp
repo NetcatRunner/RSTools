@@ -3,6 +3,7 @@
 #include <cstdlib>
 #include <string_view>
 
+/// ANSI escape codes to style terminal output.
 namespace RST::Log::Terminal
 {
 
@@ -35,6 +36,7 @@ inline constexpr const char* BG_YELLOW = "\033[43m";
 inline constexpr const char* BG_BLUE   = "\033[44m";
 inline constexpr const char* BG_WHITE  = "\033[47m";
 
+/// Guesses from `TERM` whether the terminal supports colors; always false on Windows.
 inline bool supportsColor() noexcept {
 #ifdef _WIN32
     return false; // SetConsoleMode on Windows 10+

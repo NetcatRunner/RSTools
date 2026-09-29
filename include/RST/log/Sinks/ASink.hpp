@@ -11,6 +11,9 @@
 
 namespace RST::Log {
 
+    /// Base class for sinks: handles the level, the pattern and the locking.
+    ///
+    /// Subclasses only implement log(), and flushSink() if they buffer their output.
     class ASink : public ISink {
     public:
         ASink();
@@ -27,9 +30,12 @@ namespace RST::Log {
         void setPattern(std::string_view pattern) final;
 
     protected:
+        /// Writes one message; called with the sink mutex locked.
         virtual void log(const LogMessage& message) = 0;
+        /// Flushes the output; called with the sink mutex locked.
         virtual void flushSink() {}
 
+        /// The message formatted with the sink pattern.
         [[nodiscard]] std::string_view formatted(const LogMessage& message);
         [[nodiscard]] std::mutex& sinkMutex() noexcept { return _mutex; }
 

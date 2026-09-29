@@ -11,6 +11,10 @@
 
 namespace RST::Log {
 
+    /// A log record as passed to the sinks.
+    ///
+    /// Its strings are views, only valid during ISink::write(): copy the message into a
+    /// LogMessageBuffer to keep it.
     struct LogMessage {
         std::chrono::system_clock::time_point time{};
         std::string_view category;
@@ -23,6 +27,7 @@ namespace RST::Log {
         LogMessage(LogLevel level, std::string_view category, std::string_view message, SourceLocation source = {}) noexcept;
     };
 
+    /// Copy of a LogMessage that owns its strings.
     class LogMessageBuffer {
     public:
         explicit LogMessageBuffer(const LogMessage& message);

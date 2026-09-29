@@ -7,6 +7,7 @@
 
 namespace RST::Log {
 
+    /// Severity of a message, from `Trace` to `Fatal`; `Off` disables logging.
     enum class LogLevel : std::uint8_t {
         Trace = 0,
         Debug,
@@ -19,6 +20,7 @@ namespace RST::Log {
 
     inline constexpr std::size_t kLogLevelCount = static_cast<std::size_t>(LogLevel::Off) + 1;
 
+    /// Level name, such as `INFO`.
     [[nodiscard]] constexpr std::string_view toString(LogLevel level) noexcept
     {
         switch (level) {
@@ -33,6 +35,7 @@ namespace RST::Log {
         return "UNKNOWN";
     }
 
+    /// Three-letter level name, such as `INF`.
     [[nodiscard]] constexpr std::string_view toShortString(LogLevel level) noexcept
     {
         switch (level) {

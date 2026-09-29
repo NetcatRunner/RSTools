@@ -5,6 +5,13 @@
 
 namespace RST::String {
 
+    /// @name Trimming
+    /// These functions remove `chars`, whitespace by default, from both ends of a string, or only from
+    /// the left (`l`) or right (`r`) end. `View` functions return a view without copying; the others
+    /// trim in place or return a `Copy`.
+    /// @{
+
+    /// Characters trimmed by default: space, tab, line feed, carriage return, form feed and vertical tab.
     inline constexpr std::string_view Whitespace = " \t\n\r\f\v";
 
     [[nodiscard]] constexpr std::string_view ltrimView(std::string_view str, std::string_view chars = Whitespace) noexcept
@@ -35,4 +42,5 @@ namespace RST::String {
     [[nodiscard]] std::string trimCopy(std::string_view str, std::string_view chars = Whitespace);
     [[nodiscard]] std::string ltrimCopy(std::string_view str, std::string_view chars = Whitespace);
     [[nodiscard]] std::string rtrimCopy(std::string_view str, std::string_view chars = Whitespace);
+    /// @}
 }

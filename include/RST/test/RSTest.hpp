@@ -8,6 +8,9 @@
 #include <exception>
 #include <chrono>
 
+/// @file
+/// Minimal unit-test framework: TEST_CASE(), CHECK() and RUN_ALL_TESTS().
+
 namespace RST::RSTester {
 
     constexpr const char* COLOR_GREEN       = "\033[32m";
@@ -87,6 +90,7 @@ namespace RST::RSTester {
         }
     }
 
+    /// Checks a condition; on failure, prints the expression and its operands and stops the test.
     #define CHECK(e, ...) RST::RSTester::checkInternal(DECOMPOSE_CMP_OP(e, #e) __VA_OPT__(,) __VA_ARGS__)
 
     struct testfunction{
@@ -162,10 +166,12 @@ namespace RST::RSTester {
 
     #define CONCAT_IMPL(x, y) x##y
     #define CONCAT(x, y) CONCAT_IMPL(x, y)
+    /// Defines and registers a test: `TEST_CASE(my_test) { CHECK(1 + 1 == 2); }`.
     #define TEST_CASE(name) \
         static void name(); \
         static int CONCAT(impl, __LINE__) = RST::RSTester::TestRunner::getInstance().addTest({name, #name}); \
         static void name()
 
+    /// Runs every registered test and returns the number of failures.
     #define RUN_ALL_TESTS() RST::RSTester::TestRunner::getInstance().runAllTests()
 }

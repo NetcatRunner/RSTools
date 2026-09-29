@@ -15,15 +15,25 @@
 
 namespace RST::Threads {
 
+    /// Worker threads running tasks by priority, then in submission order.
+    /// @code
+    /// using RST::Threads::ThreadPool;
+    /// ThreadPool pool(4);
+    /// std::future<int> sum = pool.submit([](int a, int b) { return a + b; }, ThreadPool::Priority::High, 2, 3);
+    /// @endcode
     class ThreadPool {
     public:
+        /// Higher priorities run first.
         enum class Priority : uint8_t {
             Low = 0,
             Normal = 1,
             High = 2,
         };
 
+        /// Starts `numThreads` workers, named after `name` in debuggers on Linux and macOS.
+        /// @throws std::invalid_argument if `numThreads` is 0.
         ThreadPool(std::size_t numThreads = std::thread::hardware_concurrency(), std::string_view name = "ThreadPool");
+        /// Runs the queued tasks, then joins the workers.
         ~ThreadPool();
 
         ThreadPool(const ThreadPool&) = delete;
@@ -31,6 +41,8 @@ namespace RST::Threads {
         ThreadPool(ThreadPool&&) = delete;
         ThreadPool& operator=(ThreadPool&&) = delete;
 
+        /// Queues `fn(args...)` and returns a `std::future` of its result.
+        /// @throws std::runtime_error if the pool is being destroyed.
         template<typename F, typename... Args>
         auto submit(F&& fn, Priority priority = Priority::Normal, Args&&... args)
         {
@@ -54,9 +66,11 @@ namespace RST::Threads {
             return future;
         }
 
+        /// Stops starting new tasks; running tasks finish.
         void pause() noexcept;
         void resume() noexcept;
         bool isPaused() const noexcept;
+        /// Blocks until every queued task has run; do not call it while paused.
         void waitForAll();
 
         std::size_t workerCount() const noexcept { return _workers.size(); };

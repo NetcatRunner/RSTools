@@ -16,9 +16,10 @@
 
 namespace RST::Parser {
 
+    /// How many values an option or positional takes.
     struct Nargs {
         int min = 1;
-        int max = 1;   // -1 = unlimited
+        int max = 1;   ///< -1 means unlimited.
 
         static Nargs exactly(int n)           { return {n, n};   }
         static Nargs atLeast(int n)           { return {n, -1};  }
@@ -29,24 +30,45 @@ namespace RST::Parser {
     };
 
 
+    /// A flag, option or positional argument, configured with chained calls.
+    ///
+    /// Keep the reference returned by the ArgParser to read the value after parsing:
+    /// @code
+    /// auto& jobs = parser.addOption({"-j", "--jobs"}, "Parallel jobs").integer().range(1, 64).defaultValue(4);
+    /// // after parsing
+    /// int count = jobs.get<int>().value_or(4);
+    /// @endcode
     class Argument {
     public:
         // ── Declaration ──────────────────────────────────────────────────────
+        /// Value used when the argument is not given.
         template <typename T>
         Argument& defaultValue(const T& value) { _defaultValue = std::format("{}", value); return *this; }
 
+        /// Makes the argument mandatory.
         Argument& required(bool isRequired = true) { _required = isRequired; return *this; }
+        /// Name of the value in the help, such as `FILE`.
         Argument& valueName(std::string name) { _valueName = std::move(name); return *this; }
+        /// Takes exactly that many values.
         Argument& nargs(int exactly) { return nargs(Nargs::exactly(exactly)); }
+        /// Only accepts one of `values`.
         Argument& choices(std::vector<std::string> values) { _choices = std::move(values); return *this; }
+        /// Only accepts integers.
         Argument& integer() { _valueType = ValueType::Integer; return *this; }
+        /// Only accepts numbers.
         Argument& number() { _valueType = ValueType::Number; return *this; }
+        /// Only accepts numbers from `min` to `max`, inclusive.
         Argument& range(double min, double max) { _range = {min, max}; return *this; }
+        /// Only accepts paths that exist.
         Argument& mustExist() { _mustExist = true; return *this; }
+        /// Only accepts paths ending with one of `extensions`, such as `.json`.
         Argument& extension(std::vector<std::string> extensions) { _extensions = std::move(extensions); return *this; }
+        /// Reads the environment variable `variable` when the argument is not given.
         Argument& envFallback(std::string variable) { _envVariable = std::move(variable); return *this; }
+        /// Lets `--no-name` unset a flag declared as `--name`.
         Argument& allowNegation() { _negatable = true; return *this; }
 
+        /// How many values to take, such as `Nargs::oneOrMore()`.
         Argument& nargs(Nargs count)
         {
             _nargs = count;
@@ -54,6 +76,7 @@ namespace RST::Parser {
             return *this;
         }
 
+        /// Custom check: values for which `check` returns false are rejected with `message`.
         Argument& validate(std::function<bool(const std::string&)> check, std::string message = "")
         {
             _check = std::move(check);
@@ -62,9 +85,12 @@ namespace RST::Parser {
         }
 
         // ── Result ───────────────────────────────────────────────────────────
+        /// Whether a value came from the command line, the environment or the config file.
         [[nodiscard]] bool isSet() const noexcept { return _isSet; }
+        /// How many times the argument was given, such as 3 for `-vvv`.
         [[nodiscard]] std::size_t count() const noexcept { return _count; }
 
+        /// The last value, or the default value, converted to `T`; `std::nullopt` if there is none or it does not convert.
         template <typename T = std::string>
         [[nodiscard]] std::optional<T> get() const
         {
@@ -73,6 +99,7 @@ namespace RST::Parser {
             return _defaultValue ? convert<T>(*_defaultValue) : std::nullopt;
         }
 
+        /// Every value converted to `T`, skipping those that do not convert, or the default value.
         template <typename T = std::string>
         [[nodiscard]] std::vector<T> getAll() const
         {
