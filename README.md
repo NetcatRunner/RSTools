@@ -108,7 +108,7 @@ int main(int argc, char** argv) {
 
 More in the [examples](https://github.com/NetcatRunner/RSTools/tree/main/examples) and the [documentation](https://netcatrunner.github.io/RSTools/).
 
-## 🤝 Contributing
+## 🤝 Community & Contributing
 
 **RSTools is a community-driven library.** Whether you want to fix a bug, add a function, improve the logger or fix a typo, your help is welcome: see [CONTRIBUTING.md](CONTRIBUTING.md) to get started, and [CHANGELOG.md](CHANGELOG.md) for what changed in each release.
 

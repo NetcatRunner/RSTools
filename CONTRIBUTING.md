@@ -54,7 +54,7 @@ cmake --build build --target docs
 
 1. Fork the repository and create a branch: `git checkout -b fix/trim-empty-string`.
 2. Write focused commits named `[TYPE] - Short description`, where `TYPE` is `ADD`, `UPDATE`, `FIX`, `REFACTOR`, `DOCS`, `TEST` or `BUILD`.
-3. Check that the build and the tests pass, and add your change under `Unreleased` in [CHANGELOG.md](CHANGELOG.md).
+3. Check that the build and the tests pass, and note your change at the top of [CHANGELOG.md](CHANGELOG.md), under an `Unreleased` heading.
 4. Open a pull request that explains what changes and why.
 
 Releases follow [Semantic Versioning](https://semver.org/): a breaking change bumps the major version.
