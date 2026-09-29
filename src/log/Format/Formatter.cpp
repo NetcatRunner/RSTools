@@ -140,8 +140,8 @@ namespace RST::Log {
                 case Token::Minute:      appendPadded(dest, calendar->tm_min, 2); break;
                 case Token::Second:      appendPadded(dest, calendar->tm_sec, 2); break;
                 case Token::Millisecond: appendNumber(dest, milliseconds, 3); break;
-                case Token::LevelFull:   dest += to_string(message.level); break;
-                case Token::LevelShort:  dest += to_short_string(message.level); break;
+                case Token::LevelFull:   dest += toString(message.level); break;
+                case Token::LevelShort:  dest += toShortString(message.level); break;
                 case Token::Category:    dest += message.category; break;
                 case Token::Message:     dest += message.message; break;
                 case Token::SourceFile:

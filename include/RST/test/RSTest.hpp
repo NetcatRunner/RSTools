@@ -24,7 +24,7 @@ namespace RST::RSTester {
     struct TestAbortException : public std::exception {};
 
     template <typename T>
-    constexpr std::string try_tostr(const T& t){
+    constexpr std::string tryToStr(const T& t){
         if constexpr(requires{ (std::ostringstream() << t).str(); }){
             return (std::ostringstream() << std::boolalpha << t).str();
         } else {
@@ -47,8 +47,8 @@ namespace RST::RSTester {
     #define CHECK_T_COMP_OP(OP)             \
         template <class B>                  \
         info_t operator OP(B&& b) && {      \
-            i.opt_lhs = try_tostr(a);       \
-            i.opt_rhs = try_tostr(b);       \
+            i.opt_lhs = tryToStr(a);       \
+            i.opt_rhs = tryToStr(b);       \
             i.result = (a OP b);            \
             return std::move(i);            \
         } static_assert(true)
@@ -60,7 +60,7 @@ namespace RST::RSTester {
         CHECK_T_COMP_OP(<=);
     #undef CHECK_T_COMP_OP
         operator info_t() && {
-            i.opt_lhs = try_tostr(a);
+            i.opt_lhs = tryToStr(a);
             i.result = a;
             return std::move(i);
         }
@@ -76,7 +76,7 @@ namespace RST::RSTester {
 
     #define DECOMPOSE_CMP_OP(expr, lit) RST::RSTester::destruct_t{RST::RSTester::info_t{lit ""}} < expr
 
-    inline void check_internal(info_t i, std::string_view additional_info = ""){
+    inline void checkInternal(info_t i, std::string_view additional_info = ""){
         (void)additional_info;
         if (!i.result) {
             std::cerr << "  " << i.sl.file_name() << ":" << i.sl.line() << " -> " 
@@ -87,7 +87,7 @@ namespace RST::RSTester {
         }
     }
 
-    #define CHECK(e, ...) RST::RSTester::check_internal(DECOMPOSE_CMP_OP(e, #e) __VA_OPT__(,) __VA_ARGS__)
+    #define CHECK(e, ...) RST::RSTester::checkInternal(DECOMPOSE_CMP_OP(e, #e) __VA_OPT__(,) __VA_ARGS__)
 
     struct testfunction{
         using function_sig = void();
@@ -97,17 +97,17 @@ namespace RST::RSTester {
 
     class TestRunner {
     public:
-        static TestRunner& GetInstance() {
+        static TestRunner& getInstance() {
             static TestRunner instance;
             return instance;
         }
 
-        int AddTest(testfunction test) {
+        int addTest(testfunction test) {
             _tests.push_back(test);
             return 0;
         }
 
-        int RunAllTests() {
+        int runAllTests() {
             auto time_start_global = std::chrono::high_resolution_clock::now();
 
             std::cout << COLOR_BOLD_YELLOW << "[==========] " << COLOR_RESET  << "Running " << _tests.size() << " tests.\n";
@@ -164,8 +164,8 @@ namespace RST::RSTester {
     #define CONCAT(x, y) CONCAT_IMPL(x, y)
     #define TEST_CASE(name) \
         static void name(); \
-        static int CONCAT(impl, __LINE__) = RST::RSTester::TestRunner::GetInstance().AddTest({name, #name}); \
+        static int CONCAT(impl, __LINE__) = RST::RSTester::TestRunner::getInstance().addTest({name, #name}); \
         static void name()
 
-    #define RUN_ALL_TESTS() RST::RSTester::TestRunner::GetInstance().RunAllTests()
+    #define RUN_ALL_TESTS() RST::RSTester::TestRunner::getInstance().runAllTests()
 }

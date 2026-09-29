@@ -1,13 +1,15 @@
 #pragma once
 
-#include <cmath>
-#include <array>
-#include <stdexcept>
-#include <initializer_list>
-#include <iostream>
-#include <algorithm>
+#include "RST/maths/Utils.hpp"
+#include "RST/maths/Vector.hpp"
 
-#include "Vector.hpp"
+#include <cmath>
+#include <cstddef>
+#include <initializer_list>
+#include <limits>
+#include <ostream>
+#include <stdexcept>
+#include <utility>
 
 namespace RST::Maths {
     template <typename T, size_t Rows, size_t Cols>
@@ -23,7 +25,7 @@ namespace RST::Maths {
             }
         }
 
-        constexpr Matrix(T value) noexcept {
+        constexpr explicit Matrix(T value) noexcept {
             for (size_t i = 0; i < Rows * Cols; ++i) m[i] = value;
         }
 
@@ -41,7 +43,35 @@ namespace RST::Maths {
         constexpr T& operator()(size_t row, size_t col) noexcept { return m[row * Cols + col]; }
         constexpr const T& operator()(size_t row, size_t col) const noexcept { return m[row * Cols + col]; }
 
-        constexpr Matrix<T, Rows, Cols> operator+(const Matrix<T, Rows, Cols>& other) const noexcept {
+        [[nodiscard]] static constexpr size_t rows() noexcept { return Rows; }
+        [[nodiscard]] static constexpr size_t cols() noexcept { return Cols; }
+
+        [[nodiscard]] constexpr T* data() noexcept { return m; }
+        [[nodiscard]] constexpr const T* data() const noexcept { return m; }
+
+        [[nodiscard]] constexpr bool operator==(const Matrix&) const noexcept = default;
+
+        constexpr Matrix& operator+=(const Matrix& other) noexcept {
+            for (size_t i = 0; i < Rows * Cols; ++i) m[i] += other.m[i];
+            return *this;
+        }
+
+        constexpr Matrix& operator-=(const Matrix& other) noexcept {
+            for (size_t i = 0; i < Rows * Cols; ++i) m[i] -= other.m[i];
+            return *this;
+        }
+
+        constexpr Matrix& operator*=(T scalar) noexcept {
+            for (size_t i = 0; i < Rows * Cols; ++i) m[i] *= scalar;
+            return *this;
+        }
+
+        constexpr Matrix& operator*=(const Matrix& other) noexcept {
+            static_assert(Rows == Cols, "Only square matrices can be multiplied in place");
+            return *this = *this * other;
+        }
+
+        [[nodiscard]] constexpr Matrix<T, Rows, Cols> operator+(const Matrix<T, Rows, Cols>& other) const noexcept {
             Matrix<T, Rows, Cols> res(0);
             for (size_t i = 0; i < Rows * Cols; ++i) {
                 res.m[i] = m[i] + other.m[i];
@@ -49,7 +79,7 @@ namespace RST::Maths {
             return res;
         }
 
-        constexpr Matrix<T, Rows, Cols> operator-(const Matrix<T, Rows, Cols>& other) const noexcept {
+        [[nodiscard]] constexpr Matrix<T, Rows, Cols> operator-(const Matrix<T, Rows, Cols>& other) const noexcept {
             Matrix<T, Rows, Cols> res(0);
             for (size_t i = 0; i < Rows * Cols; ++i) {
                 res.m[i] = m[i] - other.m[i];
@@ -58,7 +88,7 @@ namespace RST::Maths {
         }
 
         template <size_t P>
-        constexpr Matrix<T, Rows, P> operator*(const Matrix<T, Cols, P>& other) const noexcept {
+        [[nodiscard]] constexpr Matrix<T, Rows, P> operator*(const Matrix<T, Cols, P>& other) const noexcept {
             Matrix<T, Rows, P> res(0);
             for (size_t i = 0; i < Rows; ++i) {
                 for (size_t j = 0; j < P; ++j) {
@@ -72,7 +102,7 @@ namespace RST::Maths {
             return res;
         }
 
-        constexpr Matrix<T, Rows, Cols> operator*(T scalar) const noexcept {
+        [[nodiscard]] constexpr Matrix<T, Rows, Cols> operator*(T scalar) const noexcept {
             Matrix<T, Rows, Cols> res(0);
             for (size_t i = 0; i < Rows * Cols; ++i) {
                 res.m[i] = m[i] * scalar;
@@ -80,7 +110,7 @@ namespace RST::Maths {
             return res;
         }
 
-        constexpr Vector3D<T> transformPoint(const Vector3D<T>& p) const {
+        [[nodiscard]] constexpr Vector3D<T> transformPoint(const Vector3D<T>& p) const {
             static_assert(Rows >= 3 && Cols >= 4, "Matrix must be at least 3x4 to transform a 3D point");
             T res[3];
             for (size_t i = 0; i < 3; ++i) {
@@ -90,7 +120,7 @@ namespace RST::Maths {
             return Vector3D<T>{res[0], res[1], res[2]};
         }
 
-        constexpr Vector3D<T> transformDirection(const Vector3D<T>& d) const {
+        [[nodiscard]] constexpr Vector3D<T> transformDirection(const Vector3D<T>& d) const {
             static_assert(Rows >= 3 && Cols >= 3, "Matrix must be at least 3x3 to transform a 3D direction");
             T res[3];
             for (size_t i = 0; i < 3; ++i) {
@@ -99,7 +129,7 @@ namespace RST::Maths {
             return Vector3D<T>{res[0], res[1], res[2]};
         }
 
-        constexpr Matrix<T, Cols, Rows> transpose() const noexcept {
+        [[nodiscard]] constexpr Matrix<T, Cols, Rows> transpose() const noexcept {
             Matrix<T, Cols, Rows> res(0);
             for (size_t i = 0; i < Rows; ++i) {
                 for (size_t j = 0; j < Cols; ++j) {
@@ -109,7 +139,44 @@ namespace RST::Maths {
             return res;
         }
 
-        constexpr Matrix<T, Rows, Cols> inverse() const {
+        [[nodiscard]] constexpr T determinant() const noexcept {
+            static_assert(Rows == Cols, "Only square matrices have a determinant");
+            const auto& a = *this;
+            if constexpr (Rows == 1) {
+                return a(0, 0);
+            } else if constexpr (Rows == 2) {
+                return a(0, 0) * a(1, 1) - a(0, 1) * a(1, 0);
+            } else if constexpr (Rows == 3) {
+                return a(0, 0) * (a(1, 1) * a(2, 2) - a(1, 2) * a(2, 1))
+                     - a(0, 1) * (a(1, 0) * a(2, 2) - a(1, 2) * a(2, 0))
+                     + a(0, 2) * (a(1, 0) * a(2, 1) - a(1, 1) * a(2, 0));
+            } else {
+                static_assert(std::is_floating_point_v<T>, "determinant() above 3x3 needs a floating-point type");
+                Matrix temp = *this;
+                T det = T(1);
+                for (size_t i = 0; i < Rows; ++i) {
+                    size_t pivot = i;
+                    for (size_t p = i + 1; p < Rows; ++p) {
+                        if (abs(temp(p, i)) > abs(temp(pivot, i))) pivot = p;
+                    }
+                    if (temp(pivot, i) == T(0)) {
+                        return T(0);
+                    }
+                    if (pivot != i) {
+                        for (size_t c = 0; c < Cols; ++c) std::swap(temp(i, c), temp(pivot, c));
+                        det = -det;
+                    }
+                    det *= temp(i, i);
+                    for (size_t r = i + 1; r < Rows; ++r) {
+                        const T f = temp(r, i) / temp(i, i);
+                        for (size_t c = i; c < Cols; ++c) temp(r, c) -= f * temp(i, c);
+                    }
+                }
+                return det;
+            }
+        }
+
+        [[nodiscard]] constexpr Matrix<T, Rows, Cols> inverse() const {
             static_assert(Rows == Cols, "Only square matrices can be inverted");
             Matrix<T, Rows, Cols> temp = *this; 
             Matrix<T, Rows, Cols> inv;
@@ -117,10 +184,10 @@ namespace RST::Maths {
             for (size_t i = 0; i < Rows; ++i) {
                 size_t pivot = i;
                 for (size_t p = i + 1; p < Rows; ++p) {
-                    if (std::abs(temp(p, i)) > std::abs(temp(pivot, i))) pivot = p;
+                    if (abs(temp(p, i)) > abs(temp(pivot, i))) pivot = p;
                 }
 
-                if (std::abs(temp(pivot, i)) < std::numeric_limits<T>::epsilon()) {
+                if (abs(temp(pivot, i)) < std::numeric_limits<T>::epsilon()) {
                     throw std::runtime_error("Matrix is singular and cannot be inverted");
                 }
 
@@ -150,7 +217,7 @@ namespace RST::Maths {
             return inv;
         }
 
-        static constexpr Matrix<T, Rows, Cols> translation(T x, T y, T z) noexcept {
+        [[nodiscard]] static constexpr Matrix<T, Rows, Cols> translation(T x, T y, T z) noexcept {
             static_assert(Rows >= 4 && Cols >= 4, "Matrix must be 4x4 or larger for 3D translation");
             Matrix<T, Rows, Cols> res;
             res(0, 3) = x;
@@ -159,11 +226,11 @@ namespace RST::Maths {
             return res;
         }
 
-        static constexpr Matrix<T, Rows, Cols> translation(const Vector3D<T>& v) noexcept {
+        [[nodiscard]] static constexpr Matrix<T, Rows, Cols> translation(const Vector3D<T>& v) noexcept {
             return translation(v.getX(), v.getY(), v.getZ());
         }
 
-        static constexpr Matrix<T, Rows, Cols> scale(T sx, T sy, T sz) noexcept {
+        [[nodiscard]] static constexpr Matrix<T, Rows, Cols> scale(T sx, T sy, T sz) noexcept {
             static_assert(Rows >= 3 && Cols >= 3, "Matrix must be 3x3 or larger for 3D scaling");
             Matrix<T, Rows, Cols> res;
             res(0, 0) = sx;
@@ -172,10 +239,10 @@ namespace RST::Maths {
             return res;
         }
 
-        static constexpr Matrix<T, Rows, Cols> scale(T s) noexcept {
+        [[nodiscard]] static constexpr Matrix<T, Rows, Cols> scale(T s) noexcept {
             return scale(s, s, s);
         }
-        static constexpr Matrix<T, Rows, Cols> shear(T sxy, T sxz, T syx, T syz, T szx, T szy) noexcept {
+        [[nodiscard]] static constexpr Matrix<T, Rows, Cols> shear(T sxy, T sxz, T syx, T syz, T szx, T szy) noexcept {
             static_assert(Rows >= 3 && Cols >= 3, "Matrix must be 3x3 or larger for 3D shearing");
             Matrix<T, Rows, Cols> res;
             res(0, 1) = sxy;
@@ -187,7 +254,7 @@ namespace RST::Maths {
             return res;
         }
 
-        static Matrix<T, Rows, Cols> rotationX(T angleRad) {
+        [[nodiscard]] static Matrix<T, Rows, Cols> rotationX(T angleRad) {
             static_assert(Rows >= 3 && Cols >= 3, "Matrix must be 3x3 or larger for 3D rotation");
             Matrix<T, Rows, Cols> res;
             T c = std::cos(angleRad);
@@ -199,7 +266,7 @@ namespace RST::Maths {
             return res;
         }
 
-        static Matrix<T, Rows, Cols> rotationY(T angleRad) {
+        [[nodiscard]] static Matrix<T, Rows, Cols> rotationY(T angleRad) {
            static_assert(Rows >= 3 && Cols >= 3, "Matrix must be 3x3 or larger for 3D rotation");
             Matrix<T, Rows, Cols> res;
             T c = std::cos(angleRad);
@@ -213,7 +280,7 @@ namespace RST::Maths {
             return res;
         }
 
-        static Matrix<T, Rows, Cols> rotationZ(T angleRad) {
+        [[nodiscard]] static Matrix<T, Rows, Cols> rotationZ(T angleRad) {
             static_assert(Rows >= 3 && Cols >= 3, "Matrix must be 3x3 or larger for 3D rotation");
             Matrix<T, Rows, Cols> res;
             T c = std::cos(angleRad);
@@ -227,11 +294,11 @@ namespace RST::Maths {
             return res;
         }
 
-        static constexpr Matrix<T, Rows, Cols> identity() noexcept {
+        [[nodiscard]] static constexpr Matrix<T, Rows, Cols> identity() noexcept {
             return Matrix<T, Rows, Cols>();
         }
 
-        static Matrix<T, 4, 4> ortho(T left, T right, T bottom, T top, T nearP = T(-1), T farP = T(1)) {
+        [[nodiscard]] static Matrix<T, 4, 4> ortho(T left, T right, T bottom, T top, T nearP = T(-1), T farP = T(1)) {
             static_assert(Rows == 4 && Cols == 4, "ortho requires a 4x4 matrix");
             Matrix<T, 4, 4> r(T(0));
             r(0, 0) =  T(2) / (right - left);
@@ -244,9 +311,9 @@ namespace RST::Maths {
             return r;
         }
 
-        static Matrix<T, 4, 4> perspective(T fovYDeg, T aspect, T nearP, T farP) {
+        [[nodiscard]] static Matrix<T, 4, 4> perspective(T fovYDeg, T aspect, T nearP, T farP) {
             static_assert(Rows == 4 && Cols == 4, "perspective requires a 4x4 matrix");
-            const T fovYRad = fovYDeg * T(3.141592653589793) / T(180);
+            const T fovYRad = toRad(fovYDeg);
             const T f = T(1) / std::tan(fovYRad / T(2));
             Matrix<T, 4, 4> r(T(0));
             r(0, 0) = f / aspect;
@@ -257,7 +324,7 @@ namespace RST::Maths {
             return r;
         }
 
-        static Matrix<T, 4, 4> lookAt(const Vector3D<T>& eye, const Vector3D<T>& center, const Vector3D<T>& up) {
+        [[nodiscard]] static Matrix<T, 4, 4> lookAt(const Vector3D<T>& eye, const Vector3D<T>& center, const Vector3D<T>& up) {
             static_assert(Rows == 4 && Cols == 4, "lookAt requires a 4x4 matrix");
             Vector3D<T> z = (eye - center).normalized();
             Vector3D<T> x = up.cross(z).normalized();
@@ -279,6 +346,8 @@ namespace RST::Maths {
 
     using Matrix4f = Matrix<float, 4, 4>;
     using Matrix3f = Matrix<float, 3, 3>;
+    using Matrix4d = Matrix<double, 4, 4>;
+    using Matrix3d = Matrix<double, 3, 3>;
     using Vector4f = Matrix<float, 4, 1>;
     using Vector3f = Matrix<float, 3, 1>;
 

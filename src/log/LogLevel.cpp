@@ -6,7 +6,7 @@ namespace RST::Log {
 
     std::ostream& operator<<(std::ostream& out, LogLevel level)
     {
-        return out << to_string(level);
+        return out << toString(level);
     }
 
 }

@@ -1,38 +1,43 @@
 #include "RST/time/FrameTimer.hpp"
 
+#include <thread>
+
 namespace RST::Time {
 
-    FrameTimer::FrameTimer(uint32_t targetFps)
+    namespace {
+
+        constexpr double kAverageWeight = 0.1;
+
+    }
+
+    FrameTimer::FrameTimer(std::uint32_t targetFps) noexcept
+        : _startTime(Clock::now()), _previousTime(_startTime)
     {
         setTargetFps(targetFps);
-        _previousTime = std::chrono::system_clock::now();
     }
-    
-    FrameTimer::~FrameTimer()
+
+    void FrameTimer::tick() noexcept
     {
-    }
-
-    void FrameTimer::tick() {
-        auto currentTime = std::chrono::system_clock::now();
-        std::chrono::duration<double> elapsed = currentTime - _previousTime;
-
         if (_targetFps > 0) {
-            double sleepTime = _targetFrameTime - elapsed.count();
-            if (sleepTime > 0.0f) {
-                std::this_thread::sleep_for(std::chrono::duration<double>(sleepTime));
-                currentTime = std::chrono::system_clock::now();
-                elapsed = currentTime - _previousTime;
-            }
+            const Clock::time_point deadline = _previousTime + _targetFrameTime;
+            std::this_thread::sleep_until(deadline - std::chrono::milliseconds(1));
+            while (Clock::now() < deadline)
+                std::this_thread::yield();
         }
 
-        _deltaTime = elapsed.count();
-        _previousTime = currentTime;
+        const Clock::time_point now = Clock::now();
+        _deltaTime = std::chrono::duration<double>(now - _previousTime).count();
+        _previousTime = now;
 
+        _averageFrameTime = (_frameCount == 0) ? _deltaTime : _averageFrameTime + kAverageWeight * (_deltaTime - _averageFrameTime);
+        ++_frameCount;
     }
 
-    void FrameTimer::setTargetFps(uint32_t newFPS) {
-        _targetFps = newFPS;
-
-        _targetFrameTime = (_targetFps > 0) ? 1.0f / static_cast<double>(_targetFps) : 0.0f;
+    void FrameTimer::setTargetFps(std::uint32_t targetFps) noexcept
+    {
+        _targetFps = targetFps;
+        _targetFrameTime = (targetFps > 0)
+            ? std::chrono::duration_cast<Clock::duration>(std::chrono::duration<double>(1.0 / targetFps))
+            : Clock::duration::zero();
     }
 }

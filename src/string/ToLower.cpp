@@ -1,16 +1,18 @@
 #include "RST/string/ToLower.hpp"
 
-#include <algorithm>
-
 namespace RST::String {
 
-    void ToLower(std::string& str) {
-        std::transform(str.begin(), str.end(), str.begin(), ::tolower);
+    void toLower(std::string& str) noexcept
+    {
+        for (char& c : str) {
+            c = toLower(c);
+        }
     }
-    
-    std::string ToLowerCopy(const std::string& str) {
-        std::string s = str;
-        std::transform(s.begin(), s.end(), s.begin(), ::tolower);
-        return s;
+
+    std::string toLowerCopy(std::string_view str)
+    {
+        std::string result(str);
+        toLower(result);
+        return result;
     }
 }

@@ -1,10 +1,13 @@
 #pragma once
 
+#include "RST/string/Char.hpp"
+
 #include <string>
+#include <string_view>
 
 namespace RST::String {
 
-    void ToLower(std::string& str);
+    void toLower(std::string& str) noexcept;
 
-    std::string ToLowerCopy(const std::string& str);
+    [[nodiscard]] std::string toLowerCopy(std::string_view str);
 }

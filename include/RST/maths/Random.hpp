@@ -1,36 +1,38 @@
 #pragma once
 
+#include <cstddef>
 #include <random>
+#include <type_traits>
 #include <vector>
 
 namespace RST::Maths {
 
-    template<typename T>
-    T Random(const T &min, const T &max) {
-        thread_local std::random_device dev;
-        thread_local std::mt19937 rng(dev());
+    inline std::mt19937& randomEngine() {
+        thread_local std::mt19937 engine(std::random_device{}());
+        return engine;
+    }
 
-        if constexpr (std::is_integral<T>::value) {
-            std::uniform_int_distribution<T> dist(min, max);
-            return dist(rng);
-        } else if constexpr (std::is_floating_point<T>::value) {
-            std::uniform_real_distribution<T> dist(min, max);
-            return dist(rng);
+    template<typename T>
+    T random(const T& min, const T& max) {
+        static_assert(std::is_arithmetic_v<T> && !std::is_same_v<T, bool>, "random needs a number type");
+
+        if constexpr (std::is_integral_v<T>) {
+            using Wide = std::conditional_t<std::is_signed_v<T>, long long, unsigned long long>;
+            std::uniform_int_distribution<Wide> dist(min, max);
+            return static_cast<T>(dist(randomEngine()));
         } else {
-            return T{};
+            std::uniform_real_distribution<T> dist(min, max);
+            return dist(randomEngine());
         }
     }
 
     template<typename T>
-    T RandomChoice(const std::vector<T>& list) {
+    T randomChoice(const std::vector<T>& list) {
         if (list.empty())
             return T{};
-        static std::random_device dev;
-        static std::mt19937 rng(dev());
 
-        std::uniform_int_distribution<size_t> dist(0, list.size() - 1);
-        return list[dist(rng)];
-
+        std::uniform_int_distribution<std::size_t> dist(0, list.size() - 1);
+        return list[dist(randomEngine())];
     }
-    
+
 }

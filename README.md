@@ -109,7 +109,7 @@ TEST_CASE(simple_test) {
   CHECK(add(4, 5) == 9);
 };
 
-int main(int argc, const char** argv) {
+int main(int argc, char** argv) {
     // Example: Using the Logger and Parser
 
     RST::Log::Logger logger("TestLogger");
@@ -118,23 +118,20 @@ int main(int argc, const char** argv) {
 
     logger.info("Application started.");
 
-    RST::Parser::ArgParser parser;
-    parser.addFlag({"--help", "-h"}, "Help message");
+    RST::Parser::ArgParser parser("example", "Shows a few RSTools features.");
+    parser.addFlag({"-v", "--verbose"}, "Print more details");
+    parser.addOption({"-n", "--count"}, "How many greetings").integer().range(1, 10).defaultValue(1);
 
-    try {
-        parser.parse(argc, argv);
-    } catch (const RST::Parser::HelpRequested& h) {
-        parser.printHelp();
-        return 0;
-    } catch (const std::exception& e) {
-        logger.error(e.what());
-        parser.printHelp();
-        return 1;
+    // -h/--help and errors are handled here: nothing throws.
+    if (auto result = parser.parse(argc, argv); !result) {
+        result.print();
+        return result.exitCode();
     }
 
     // Example: Using String utilities
     std::string text = "   Hello RSTools!   ";
-    std::cout << RST::String::LtrimCopy(text) << "\n";
+    for (int i = 0; i < parser.get<int>("--count").value_or(1); ++i)
+        std::cout << RST::String::ltrimCopy(text) << "\n";
 
     logger.log(RST::Log::LogLevel::Info, "Application stop.");
     return RUN_ALL_TESTS();

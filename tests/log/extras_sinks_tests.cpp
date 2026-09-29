@@ -1,5 +1,7 @@
 #include <RST/RST.hpp>
 
+#include <thread>
+
 TEST_CASE(test_null_sink_discards) {
     auto sink = std::make_shared<RST::Log::NullSink>();
     RST::Log::Logger logger("NullTest");

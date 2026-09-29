@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.28)
 
 project(RST
-    VERSION 2.0.0
+    VERSION 3.0.0
     LANGUAGES CXX
 )
 
@@ -11,7 +11,7 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 
 find_package(Threads REQUIRED)
 
-file(GLOB_RECURSE SOURCES
+file(GLOB_RECURSE SOURCES CONFIGURE_DEPENDS
     ${PROJECT_SOURCE_DIR}/src/*.cpp
 )
 

@@ -1,10 +1,14 @@
 #pragma once
 
-#include <vector>
 #include <string>
+#include <string_view>
+#include <vector>
 
 namespace RST::String {
 
-    std::vector<std::string> SplitString(const std::string& str, const std::string& delimiter);
-    std::vector<std::string> SplitStringWithQuotes(const std::string& str, const std::string& delimiters, char quote = '\"');
+    [[nodiscard]] std::vector<std::string> splitString(std::string_view str, std::string_view delimiters);
+
+    [[nodiscard]] std::vector<std::string_view> splitStringView(std::string_view str, std::string_view delimiters);
+
+    [[nodiscard]] std::vector<std::string> splitStringWithQuotes(std::string_view str, std::string_view delimiters, char quote = '\"');
 }

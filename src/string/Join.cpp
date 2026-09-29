@@ -2,19 +2,8 @@
 
 namespace RST::String {
 
-    std::string JoinString(const std::vector<std::string>& stringList, char delimiter) {
-        if (stringList.empty())
-            return "";
-
-        std::string result;
-
-        for (std::size_t i = 0; i < stringList.size(); i++) {
-
-            result += stringList[i];
-
-            if (delimiter != '\0' && i < stringList.size() - 1)
-                result += delimiter;
-        }
-        return result;
+    std::string joinString(const std::vector<std::string>& stringList, char delimiter)
+    {
+        return join(stringList, delimiter == '\0' ? std::string_view() : std::string_view(&delimiter, 1));
     }
 }

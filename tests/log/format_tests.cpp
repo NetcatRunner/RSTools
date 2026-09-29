@@ -141,5 +141,5 @@ TEST_CASE(test_message_buffer_owns_its_text) {
     CHECK(moved->source.line == 12);
 }
 
-static_assert(RST::Log::to_string(RST::Log::LogLevel::Warn) == "WARN");
-static_assert(RST::Log::to_short_string(RST::Log::LogLevel::Fatal) == "FTL");
+static_assert(RST::Log::toString(RST::Log::LogLevel::Warn) == "WARN");
+static_assert(RST::Log::toShortString(RST::Log::LogLevel::Fatal) == "FTL");

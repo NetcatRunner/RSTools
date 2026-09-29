@@ -1,31 +1,39 @@
 #pragma once
 
 #include <chrono>
-#include <thread>
-
 #include <cstdint>
 
 namespace RST::Time {
-    class FrameTimer
-    {
-    private:
-        uint32_t _targetFps;
 
-        std::chrono::time_point<std::chrono::system_clock> _previousTime;
-        double _deltaTime = 0;
-        double _targetFrameTime;
+    class FrameTimer {
     public:
-        FrameTimer(/* args */) = delete;
-        FrameTimer(uint32_t targetFps);
-        ~FrameTimer();
+        using Clock = std::chrono::steady_clock;
 
-        void tick();
+        explicit FrameTimer(std::uint32_t targetFps = 0) noexcept;
 
-        double getDeltaTime() const { return _deltaTime; };
+        void tick() noexcept;
 
-        double getCurrentFps() const { return (_deltaTime > 0.0) ? (1.0 / _deltaTime) : 0.0; };
+        [[nodiscard]] double getDeltaTime() const noexcept { return _deltaTime; }
 
-        void setTargetFps(uint32_t newFPS);
+        [[nodiscard]] double getCurrentFps() const noexcept { return (_deltaTime > 0.0) ? (1.0 / _deltaTime) : 0.0; }
+
+        [[nodiscard]] double getAverageFps() const noexcept { return (_averageFrameTime > 0.0) ? (1.0 / _averageFrameTime) : 0.0; }
+
+        [[nodiscard]] std::uint64_t getFrameCount() const noexcept { return _frameCount; }
+
+        [[nodiscard]] double getTotalTime() const noexcept { return std::chrono::duration<double>(_previousTime - _startTime).count(); }
+
+        void setTargetFps(std::uint32_t targetFps) noexcept;
+        [[nodiscard]] std::uint32_t getTargetFps() const noexcept { return _targetFps; }
+
+    private:
+        Clock::time_point _startTime;
+        Clock::time_point _previousTime;
+        Clock::duration _targetFrameTime{};
+        double _deltaTime = 0.0;
+        double _averageFrameTime = 0.0;
+        std::uint64_t _frameCount = 0;
+        std::uint32_t _targetFps = 0;
     };
-    
+
 }

@@ -1,10 +1,13 @@
 #pragma once
 
+#include "RST/string/Char.hpp"
+
 #include <string>
+#include <string_view>
 
 namespace RST::String {
 
-    void ToUpper(std::string& str);
+    void toUpper(std::string& str) noexcept;
 
-    std::string ToUpperCopy(const std::string& str);
+    [[nodiscard]] std::string toUpperCopy(std::string_view str);
 }

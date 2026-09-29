@@ -1,7 +1,5 @@
-file(GLOB_RECURSE TEST_SOURCES 
-    "maths/*.cpp"
-    "log/*.cpp"
-    "main.cpp"
+file(GLOB_RECURSE TEST_SOURCES CONFIGURE_DEPENDS
+    "${CMAKE_CURRENT_SOURCE_DIR}/*.cpp"
 )
 
 add_executable(run_tests ${TEST_SOURCES})

@@ -1,16 +1,18 @@
 #include "RST/string/ToUpper.hpp"
 
-#include <algorithm>
-
 namespace RST::String {
 
-    void ToUpper(std::string& str) {
-        std::transform(str.begin(), str.end(), str.begin(), ::toupper);
+    void toUpper(std::string& str) noexcept
+    {
+        for (char& c : str) {
+            c = toUpper(c);
+        }
     }
-    
-    std::string ToUpperCopy(const std::string& str) {
-        std::string s = str;
-        std::transform(s.begin(), s.end(), s.begin(), ::toupper);
-        return s;
+
+    std::string toUpperCopy(std::string_view str)
+    {
+        std::string result(str);
+        toUpper(result);
+        return result;
     }
 }

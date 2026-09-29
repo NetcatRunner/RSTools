@@ -48,6 +48,7 @@ namespace RST::Log {
             _target << Terminal::RESET;
         }
         _target.put('\n');
+        _target.flush();
     }
 
     void ConsoleSink::flushSink()

@@ -19,7 +19,7 @@ namespace RST::Log {
 
     inline constexpr std::size_t kLogLevelCount = static_cast<std::size_t>(LogLevel::Off) + 1;
 
-    [[nodiscard]] constexpr std::string_view to_string(LogLevel level) noexcept
+    [[nodiscard]] constexpr std::string_view toString(LogLevel level) noexcept
     {
         switch (level) {
             case LogLevel::Trace: return "TRACE";
@@ -33,7 +33,7 @@ namespace RST::Log {
         return "UNKNOWN";
     }
 
-    [[nodiscard]] constexpr std::string_view to_short_string(LogLevel level) noexcept
+    [[nodiscard]] constexpr std::string_view toShortString(LogLevel level) noexcept
     {
         switch (level) {
             case LogLevel::Trace: return "TRC";
